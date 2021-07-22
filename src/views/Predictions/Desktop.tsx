@@ -3,19 +3,14 @@ import styled from 'styled-components'
 import Split from 'split-grid'
 import { ArrowDownIcon, Button, ChartIcon } from '@pancakeswap/uikit'
 import debounce from 'lodash/debounce'
-import delay from 'lodash/delay'
 import { useAppDispatch } from 'state'
 import { useGetPredictionsStatus, useIsChartPaneOpen, useIsHistoryPaneOpen } from 'state/hooks'
 import { setChartPaneState } from 'state/predictions'
 import { PredictionStatus } from 'state/types'
 import { useTranslation } from 'contexts/Localization'
-import TradingView from './components/TradingView'
 import { ErrorNotification, PauseNotification } from './components/Notification'
 import History from './History'
 import Positions from './Positions'
-
-// The value to set the chart when the user clicks the chart tab at the bottom
-const GRID_TEMPLATE_ROW = '1.2fr 12px .8fr'
 
 const ExpandChartButton = styled(Button)`
   background-color: ${({ theme }) => theme.card.background};
@@ -44,11 +39,6 @@ const SplitWrapper = styled.div`
   grid-template-rows: 1fr 12px 0;
   flex: 1;
   overflow: hidden;
-`
-
-const ChartPane = styled.div`
-  overflow: hidden;
-  position: relative;
 `
 
 const HistoryPane = styled.div<{ isHistoryPaneOpen: boolean }>`
@@ -109,21 +99,8 @@ const Desktop: React.FC = () => {
   const { t } = useTranslation()
   const status = useGetPredictionsStatus()
 
-  const toggleChartPane = () => {
-    const newChartPaneState = !isChartPaneOpen
-
-    if (newChartPaneState) {
-      splitWrapperRef.current.style.transition = 'grid-template-rows 150ms'
-      splitWrapperRef.current.style.gridTemplateRows = GRID_TEMPLATE_ROW
-
-      // Purely comedic: We only want to animate if we are clicking the open chart button
-      // If we keep the transition on the resizing becomes very choppy
-      delay(() => {
-        splitWrapperRef.current.style.transition = ''
-      }, 150)
-    }
-
-    dispatch(setChartPaneState(newChartPaneState))
+  const handleOpenChart = () => {
+    window.open('https://dex.guru/token/0x7130d2a12b9bcbfae4f2634d864a1ee1ce3ead9c-bsc', '_blank')
   }
 
   useEffect(() => {
@@ -154,16 +131,15 @@ const Desktop: React.FC = () => {
 
   return (
     <>
-      {!isChartPaneOpen && (
-        <ExpandChartButton
-          variant="tertiary"
-          scale="sm"
-          startIcon={isChartPaneOpen ? <ArrowDownIcon /> : <ChartIcon />}
-          onClick={toggleChartPane}
-        >
-          {isChartPaneOpen ? t('Close') : t('Charts')}
-        </ExpandChartButton>
-      )}
+      <ExpandChartButton
+        variant="tertiary"
+        scale="sm"
+        startIcon={isChartPaneOpen ? <ArrowDownIcon /> : <ChartIcon />}
+        onClick={handleOpenChart}
+      >
+        {t('Charts')}
+      </ExpandChartButton>
+
       <StyledDesktop>
         <SplitWrapper ref={splitWrapperRef}>
           <PositionPane>
@@ -176,9 +152,6 @@ const Desktop: React.FC = () => {
             )}
           </PositionPane>
           <Gutter ref={gutterRef} />
-          <ChartPane ref={chartRef}>
-            <TradingView />
-          </ChartPane>
         </SplitWrapper>
         <HistoryPane isHistoryPaneOpen={isHistoryPaneOpen}>
           <History />
