@@ -11,25 +11,25 @@ import SuspenseWithChunkError from './components/SuspenseWithChunkError'
 import { ToastListener } from './contexts/ToastsContext'
 import PageLoader from './components/PageLoader'
 import EasterEgg from './components/EasterEgg'
-import Pools from './views/Pools'
+// import Pools from './views/Pools'
 import history from './routerHistory'
 
 // Route-based code splitting
 // Only pool is included in the main bundle because of it's the most visited page
-const Home = lazy(() => import('./views/Home'))
-const Farms = lazy(() => import('./views/Farms'))
-const Lottery = lazy(() => import('./views/Lottery'))
-const Ifos = lazy(() => import('./views/Ifos'))
+// const Home = lazy(() => import('./views/Home'))
+// const Farms = lazy(() => import('./views/Farms'))
+// const Lottery = lazy(() => import('./views/Lottery'))
+// const Ifos = lazy(() => import('./views/Ifos'))
 const NotFound = lazy(() => import('./views/NotFound'))
-const Collectibles = lazy(() => import('./views/Collectibles'))
-const Teams = lazy(() => import('./views/Teams'))
-const Team = lazy(() => import('./views/Teams/Team'))
-const Profile = lazy(() => import('./views/Profile'))
-const TradingCompetition = lazy(() => import('./views/TradingCompetition'))
+// const Collectibles = lazy(() => import('./views/Collectibles'))
+// const Teams = lazy(() => import('./views/Teams'))
+// const Team = lazy(() => import('./views/Teams/Team'))
+// const Profile = lazy(() => import('./views/Profile'))
+// const TradingCompetition = lazy(() => import('./views/TradingCompetition'))
 const Predictions = lazy(() => import('./views/Predictions'))
-const Voting = lazy(() => import('./views/Voting'))
-const Proposal = lazy(() => import('./views/Voting/Proposal'))
-const CreateProposal = lazy(() => import('./views/Voting/CreateProposal'))
+// const Voting = lazy(() => import('./views/Voting'))
+// const Proposal = lazy(() => import('./views/Voting/Proposal'))
+// const CreateProposal = lazy(() => import('./views/Voting/CreateProposal'))
 
 // This config is required for number formatting
 BigNumber.config({
@@ -51,39 +51,40 @@ const App: React.FC = () => {
         <SuspenseWithChunkError fallback={<PageLoader />}>
           <Switch>
             <Route path="/" exact>
-              <Home />
+              {/* <Home /> */}
+              <Predictions />
             </Route>
-            <Route path="/farms">
+            {/* <Route path="/farms">
               <Farms />
-            </Route>
-            <Route path="/pools">
+            </Route> */}
+            {/* <Route path="/pools">
               <Pools />
-            </Route>
-            <Route path="/lottery">
+            </Route> */}
+            {/* <Route path="/lottery">
               <Lottery />
-            </Route>
-            <Route path="/ifo">
+            </Route> */}
+            {/* <Route path="/ifo">
               <Ifos />
-            </Route>
-            <Route path="/collectibles">
+            </Route> */}
+            {/* <Route path="/collectibles">
               <Collectibles />
-            </Route>
-            <Route exact path="/teams">
+            </Route> */}
+            {/* <Route exact path="/teams">
               <Teams />
             </Route>
             <Route path="/teams/:id">
               <Team />
-            </Route>
-            <Route path="/profile">
+            </Route> */}
+            {/* <Route path="/profile">
               <Profile />
-            </Route>
-            <Route path="/competition">
+            </Route> */}
+            {/* <Route path="/competition">
               <TradingCompetition />
-            </Route>
-            <Route path="/prediction">
+            </Route> */}
+            {/* <Route path="/prediction">
               <Predictions />
-            </Route>
-            <Route exact path="/voting">
+            </Route> */}
+            {/* <Route exact path="/voting">
               <Voting />
             </Route>
             <Route exact path="/voting/proposal/create">
@@ -91,17 +92,17 @@ const App: React.FC = () => {
             </Route>
             <Route path="/voting/proposal/:id">
               <Proposal />
-            </Route>
+            </Route> */}
             {/* Redirect */}
-            <Route path="/staking">
+            {/* <Route path="/staking">
               <Redirect to="/pools" />
-            </Route>
-            <Route path="/syrup">
+            </Route> */}
+            {/* <Route path="/syrup">
               <Redirect to="/pools" />
-            </Route>
-            <Route path="/nft">
+            </Route> */}
+            {/* <Route path="/nft">
               <Redirect to="/collectibles" />
-            </Route>
+            </Route> */}
 
             {/* 404 */}
             <Route component={NotFound} />
