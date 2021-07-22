@@ -15,28 +15,28 @@ const config: (t: ContextApi['t']) => MenuEntry[] = (t) => [
   },
 
   {
-      label: t('More'),
-      icon: 'MoreIcon',
-      items: [
-        {
-          label: t('About'),
-          href: 'https://pepe.community',
-        },
-        {
-          label: t('FrogBank'),
-          href: 'https://frogbank.pepe.community',
-        },
-        {
-          label: t('WhitePaper'),
-          href: 'https://frogbank.pepe.community',
-        },
-        {
-          label: t('XBN'),
-          href: 'https://xbn.finance',
-        },
-      ]
+    label: t('More'),
+    icon: 'MoreIcon',
+    items: [
+      {
+        label: t('About'),
+        href: 'https://pepe.community',
+      },
+      {
+        label: t('FrogBank'),
+        href: 'https://frogbank.pepe.community',
+      },
+      {
+        label: t('WhitePaper'),
+        href: 'https://frogbank.pepe.community',
+      },
+      {
+        label: t('XBN'),
+        href: 'https://xbn.finance',
+      },
+    ],
   },
-  
+
   // {
   //   label: t('Trade'),
   //   icon: 'TradeIcon',
@@ -103,7 +103,7 @@ const config: (t: ContextApi['t']) => MenuEntry[] = (t) => [
   //     },
   //   ],
   // },
-  //         
+  //
   // {
   //   label: t('IFO'),
   //   icon: 'IfoIcon',
