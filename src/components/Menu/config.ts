@@ -13,25 +13,28 @@ const config: (t: ContextApi['t']) => MenuEntry[] = (t) => [
     href: 'https://exchange.pancakeswap.finance/#/swap?outputCurrency=0x0c1b3983d2a4aa002666820de5a0b43293291ea6',
     target: '_blank',
   },
+
   {
-    label: t('About'),
-    icon: 'HomeIcon',
-    href: 'https://pepe.community',
-  },
-  {
-    label: t('FrogBank'),
-    icon: 'HomeIcon',
-    href: 'https://frogbank.pepe.community',
-  },
-  {
-    label: t('WhitePaper'),
-    icon: 'HomeIcon',
-    href: 'https://docs.pepe.community/',
-  },
-  {
-    label: t('XBN'),
-    icon: 'HomeIcon',
-    href: 'https://xbn.finance',
+      label: t('More'),
+      icon: 'MoreIcon',
+      items: [
+        {
+          label: t('About'),
+          href: 'https://pepe.community',
+        },
+        {
+          label: t('FrogBank'),
+          href: 'https://frogbank.pepe.community',
+        },
+        {
+          label: t('WhitePaper'),
+          href: 'https://frogbank.pepe.community',
+        },
+        {
+          label: t('XBN'),
+          href: 'https://xbn.finance',
+        },
+      ]
   },
   
   // {
