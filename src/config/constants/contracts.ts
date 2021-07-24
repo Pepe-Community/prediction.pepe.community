@@ -75,4 +75,12 @@ export default {
     56: '0x342c99e9aC24157657095eC69CB04b73257e7A9C',
     97: '',
   },
+  pepeProtocol: {
+    56: '0x0c1b3983d2a4aa002666820de5a0b43293291ea6',
+    97: '',
+  },
+  pancakeRouter: {
+    56: '0x10ed43c718714eb63d5aa57b78b54704e256024e',
+    97: '',
+  },
 }

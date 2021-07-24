@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import BigNumber from 'bignumber.js'
 import { useWeb3React } from '@web3-react/core'
 import { useSelector } from 'react-redux'
@@ -12,6 +12,7 @@ import { getBalanceAmount } from 'utils/formatBalance'
 import { BIG_ZERO } from 'utils/bigNumber'
 import useRefresh from 'hooks/useRefresh'
 import { filterFarmsByQuoteToken } from 'utils/farmsPriceHelpers'
+import { usePancakeRouter, usePepe } from 'hooks/useContract'
 import {
   fetchFarmsPublicDataAsync,
   fetchPoolsPublicDataAsync,
@@ -329,6 +330,28 @@ export const usePriceBnbBusd = (): BigNumber => {
 export const usePriceCakeBusd = (): BigNumber => {
   const cakeBnbFarm = useFarmFromPid(251)
   return new BigNumber(cakeBnbFarm.token.busdPrice)
+}
+
+export const usePepePriceBusd = (): number => {
+  const { account } = useWeb3React()
+  const [price, setPrice] = useState(0)
+  const pepeContract = usePepe()
+  const pancakeRouter = usePancakeRouter()
+
+  useEffect(() => {
+    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/no-extra-semi
+    ;(async () => {
+      const PepeAddress = await pepeContract.address
+      const [_, pepePricePerBillion] = await pancakeRouter.getAmountsOut('1000000000000000000', [
+        PepeAddress,
+        '0xe9e7cea3dedca5984780bafc599bd69add087d56',
+      ])
+      setPrice(new BigNumber(pepePricePerBillion.toString()).div(10 ** 9).toNumber() / 10 ** 9)
+    })()
+  }, [pancakeRouter, pepeContract.address])
+
+  return price
 }
 
 // Block

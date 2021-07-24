@@ -68,3 +68,11 @@ export const getBunnySpecialCakeVaultAddress = () => {
 export const getBunnySpecialPredictionAddress = () => {
   return getAddress(addresses.bunnySpecialPrediction)
 }
+
+export const getPepeAddress = () => {
+  return getAddress(addresses.pepeProtocol)
+}
+
+export const getPancakeRouterAddress = () => {
+  return getAddress(addresses.pancakeRouter)
+}
