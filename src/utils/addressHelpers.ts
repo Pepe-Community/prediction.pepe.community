@@ -76,3 +76,7 @@ export const getPepeAddress = () => {
 export const getPancakeRouterAddress = () => {
   return getAddress(addresses.pancakeRouter)
 }
+
+export const getPepePredictionAddress = () => {
+  return getAddress(addresses.pepePrediction)
+}

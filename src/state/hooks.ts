@@ -12,7 +12,7 @@ import { getBalanceAmount } from 'utils/formatBalance'
 import { BIG_ZERO } from 'utils/bigNumber'
 import useRefresh from 'hooks/useRefresh'
 import { filterFarmsByQuoteToken } from 'utils/farmsPriceHelpers'
-import { usePancakeRouter, usePepe } from 'hooks/useContract'
+import { usePancakeRouter, usePepe, usePepePrediction } from 'hooks/useContract'
 import {
   fetchFarmsPublicDataAsync,
   fetchPoolsPublicDataAsync,
@@ -342,14 +342,19 @@ export const usePepePriceBusd = (): number => {
     // @ts-ignore
     // eslint-disable-next-line @typescript-eslint/no-extra-semi
     ;(async () => {
-      const PepeAddress = await pepeContract.address
-      const [_, pepePricePerBillion] = await pancakeRouter.getAmountsOut('1000000000000000000', [
-        PepeAddress,
-        '0xe9e7cea3dedca5984780bafc599bd69add087d56',
-      ])
-      setPrice(new BigNumber(pepePricePerBillion.toString()).div(10 ** 9).toNumber() / 10 ** 9)
+      try {
+        if (!pepeContract || !pancakeRouter) return
+        const PepeAddress = await pepeContract.address
+        const [_, pepePricePerBillion] = await pancakeRouter.getAmountsOut('1000000000000000000', [
+          PepeAddress,
+          '0xe9e7cea3dedca5984780bafc599bd69add087d56',
+        ])
+        setPrice(new BigNumber(pepePricePerBillion.toString()).div(10 ** 9).toNumber() / 10 ** 9)
+      } catch (e) {
+        console.log(e)
+      }
     })()
-  }, [pancakeRouter, pepeContract.address])
+  }, [pancakeRouter, pepeContract])
 
   return price
 }
@@ -520,4 +525,27 @@ export const useGetVotingStateLoadingStatus = () => {
 export const useGetProposalLoadingStatus = () => {
   const votingStatus = useSelector((state: State) => state.voting.proposalLoadingStatus)
   return votingStatus
+}
+
+export const useGetLastedBTCPrice = () => {
+  const [price, setPrice] = useState(0)
+  const pepePrediction = usePepePrediction()
+
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      try {
+        const _price: BigNumber = await pepePrediction._getPriceFromPancakeSwap()
+        setPrice(_price.toNumber() / 10 ** 10)
+      } catch (e) {
+        console.log(e)
+      }
+    }, 12000)
+
+    return () => {
+      console.log('Unmount')
+      clearInterval(interval)
+    }
+  }, [pepePrediction])
+
+  return price
 }

@@ -27,6 +27,7 @@ import {
   getBunnySpecialPredictionContract,
   getPepeContract,
   getPancakeRouterContract,
+  getPepePredictionContract,
 } from 'utils/contractHelpers'
 
 /**
@@ -164,4 +165,9 @@ export const usePepe = () => {
 export const usePancakeRouter = () => {
   const provider = useWeb3Provider()
   return useMemo(() => getPancakeRouterContract(provider.getSigner()), [provider])
+}
+
+export const usePepePrediction = () => {
+  const provider = useWeb3Provider()
+  return useMemo(() => getPepePredictionContract(provider.getSigner()), [provider])
 }

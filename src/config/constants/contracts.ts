@@ -83,4 +83,8 @@ export default {
     56: '0x10ed43c718714eb63d5aa57b78b54704e256024e',
     97: '',
   },
+  pepePrediction: {
+    56: '0x8EFCd18aa5E235AE2A2C3a41225D95fFAFF5b6DC',
+    97: '',
+  },
 }
