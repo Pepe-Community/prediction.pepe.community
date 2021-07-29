@@ -9,6 +9,7 @@ import { Bet, BetPosition } from 'state/types'
 import { fetchBet } from 'state/predictions'
 import { Result } from 'state/predictions/helpers'
 import { getBscScanTransactionUrl } from 'utils/bscscan'
+import { usePepePrediction } from 'hooks/useContract'
 import useIsRefundable from '../../hooks/useIsRefundable'
 import { formatBnb, getNetPayout } from '../../helpers'
 import CollectWinningsButton from '../CollectWinningsButton'
@@ -43,6 +44,7 @@ const BetResult: React.FC<BetResultProps> = ({ bet, result }) => {
     <Text as="p">{t('Includes your original position and your winnings, minus the %fee% fee.', { fee: '3%' })}</Text>,
     { placement: 'auto' },
   )
+  const pepePrediction = usePepePrediction()
 
   const isWinner = result === Result.WIN
 
@@ -101,7 +103,7 @@ const BetResult: React.FC<BetResultProps> = ({ bet, result }) => {
   }
 
   const handleSuccess = async () => {
-    await dispatch(fetchBet({ account, id: bet.id }))
+    await dispatch(fetchBet({ account, id: bet.id, contract: pepePrediction }))
   }
 
   return (

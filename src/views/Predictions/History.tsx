@@ -15,6 +15,7 @@ import {
   useGetIsFetchingHistory,
   useIsHistoryPaneOpen,
 } from 'state/hooks'
+import { usePepePrediction } from 'hooks/useContract'
 import { Header, HistoryTabs } from './components/History'
 import RoundsTab from './components/History/RoundsTab'
 import PnlTab from './components/History/PnlTab/PnlTab'
@@ -55,12 +56,13 @@ const History = () => {
   const { t } = useTranslation()
   const bets = useGetHistoryByAccount(account)
   const [activeTab, setActiveTab] = useState(HistoryTabs.ROUNDS)
+  const pepePrediction = usePepePrediction()
 
   useEffect(() => {
     if (account && isHistoryPaneOpen) {
-      dispatch(fetchHistory({ account }))
+      dispatch(fetchHistory({ account, contract: pepePrediction }))
     }
-  }, [account, currentEpoch, isHistoryPaneOpen, dispatch])
+  }, [account, currentEpoch, isHistoryPaneOpen, dispatch, pepePrediction])
 
   // Currently the api cannot filter by unclaimed AND won so we do it here
   // when the user has selected Uncollected only include positions they won

@@ -306,13 +306,19 @@ export const getBetHistory = async (
           }
           user {
             ${getUserBaseFields()}
-          } 
+          }
         }
       }
     `,
     { first, skip, where },
   )
   return response.bets
+}
+
+export const getBetByContract = async (contract: any, id: string) => {
+  const t = await contract.round(id)
+  console.log(t)
+  return t
 }
 
 export const getBet = async (betId: string): Promise<BetResponse> => {
@@ -327,7 +333,7 @@ export const getBet = async (betId: string): Promise<BetResponse> => {
           }
           user {
             ${getUserBaseFields()}
-          } 
+          }
         }
       }
   `,

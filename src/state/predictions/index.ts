@@ -3,7 +3,8 @@ import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
 import maxBy from 'lodash/maxBy'
 import merge from 'lodash/merge'
 import { BIG_ZERO } from 'utils/bigNumber'
-import { Bet, HistoryFilter, Market, PredictionsState, PredictionStatus, Round } from 'state/types'
+import { Bet, BetPosition, HistoryFilter, Market, PredictionsState, PredictionStatus, Round } from 'state/types'
+import BigNumber from 'bignumber.js'
 import {
   makeFutureRoundResponse,
   transformRoundResponse,
@@ -11,6 +12,7 @@ import {
   transformBetResponse,
   getBet,
   makeRoundData,
+  getBetByContract,
 } from './helpers'
 
 const initialState: PredictionsState = {
@@ -33,10 +35,12 @@ const initialState: PredictionsState = {
 }
 
 // Thunks
-export const fetchBet = createAsyncThunk<{ account: string; bet: Bet }, { account: string; id: string }>(
+export const fetchBet = createAsyncThunk<{ account: string; bet: Bet }, { account: string; id: string; contract: any }>(
   'predictions/fetchBet',
-  async ({ account, id }) => {
+  async ({ account, id, contract }) => {
+    console.log('Fetch bet')
     const response = await getBet(id)
+    const r1 = await getBetByContract(contract, id)
     const bet = transformBetResponse(response)
     return { account, bet }
   },
@@ -76,18 +80,127 @@ export const fetchCurrentBets = createAsyncThunk<
   return { account, bets: betResponses.map(transformBetResponse) }
 })
 
-export const fetchHistory = createAsyncThunk<{ account: string; bets: Bet[] }, { account: string; claimed?: boolean }>(
-  'predictions/fetchHistory',
-  async ({ account, claimed }) => {
-    const response = await getBetHistory({
-      user: account.toLowerCase(),
-      claimed,
-    })
-    const bets = response.map(transformBetResponse)
+const getEvent = async (contract: any, account: string, roundId: number, startBlock: number, lastedBlock: number) => {
+  const blockLimit = 5000
+  if (startBlock === lastedBlock) {
+    return null
+  }
+  try {
+    const filter = await contract.filters.Claim(account, roundId, null)
+    const event = await contract.queryFilter(filter, startBlock, startBlock + blockLimit)
+    return event
+  } catch (e) {
+    console.log(e)
+    return getEvent(contract, account, roundId, startBlock + blockLimit, lastedBlock)
+  }
+}
 
-    return { account, bets }
-  },
-)
+const getLedgerByRoundId = async (contract: any, account: string, roundId: string) => {
+  try {
+    const [position, amount, _claimed] = await contract.ledger(roundId, account)
+    return {
+      position: position === 0 ? BetPosition.BULL : BetPosition.BEAR,
+      amount: (amount as BigNumber).div(10 ** 9).toNumber() / 10 ** 9,
+      claimed: _claimed,
+      claimedHash: '0xa4860fd610fc29455ece7e6b30649884009fe428d9b42ad651c85187585853a6',
+      hash: '0x9f456e9ba2f15dcf79f733c2c93a6e4c3f288af27eed1e388971046c89b01be2',
+      id: '0x5704acfae90dca975cc4af7d7bd8d056e9bee87c062b0000',
+    }
+  } catch (e) {
+    return null
+  }
+}
+
+const getRoundInfo = async (contract: any, roundId: string) => {
+  try {
+    const [
+      id,
+      startBlock,
+      lockBlock,
+      endBlock,
+      lockPrice,
+      closePrice,
+      totalAmount,
+      bullAmount,
+      bearAmount,
+      rewardBaseCalAmount,
+      rewardAmount,
+      oracleCalled,
+    ] = await contract.rounds(roundId)
+    return {
+      id: id.toString(),
+      epoch: id.toString(),
+      startBlock: startBlock.toString(),
+      lockBlock: lockBlock.toString(),
+      endBlock: endBlock.toString(),
+      lockPrice: (lockPrice.toNumber() / 10 ** 8).toString(),
+      closePrice: (closePrice / 10 ** 8).toString(),
+      totalAmount: (totalAmount.div(10 ** 8).toNumber() / 10 ** 10).toString(),
+      bullAmount: (bullAmount.div(10 ** 8).toNumber() / 10 ** 10).toString(),
+      bearAmount: (bearAmount.div(10 ** 8).toNumber() / 10 ** 10).toString(),
+      failed: !oracleCalled,
+      position: lockPrice.gt(closePrice) ? BetPosition.BEAR : BetPosition.BULL,
+    }
+  } catch (e) {
+    console.log(e)
+    return null
+  }
+}
+
+function filterClaimed(data: any[], claimed: boolean | undefined) {
+  if (claimed === undefined) {
+    return data
+  }
+  if (!claimed) {
+    return data.filter((record) => !record.claimed)
+  }
+  return data.filter((record) => record.claimed)
+}
+export const fetchHistory = createAsyncThunk<
+  { account: string; bets: Bet[] },
+  { account: string; claimed?: boolean; contract?: any }
+>('predictions/fetchHistory', async ({ account, claimed, contract }) => {
+  // const response = await getBetHistory({
+  //   user: account.toLowerCase(),
+  //   claimed,
+  // })
+
+  const [roundsNum] = await contract.getUserRounds(account, 0, 100)
+  const roundDetailPromises = []
+  for (let i = 0; i < roundsNum.length; i++) {
+    roundDetailPromises.push(
+      new Promise((resolve, reject) => {
+        try {
+          getLedgerByRoundId(contract, account, roundsNum[i]).then((ledger) => {
+            getRoundInfo(contract, roundsNum[i].toNumber()).then((value) => {
+              resolve({
+                ...ledger,
+                round: value,
+                user: {
+                  address: account,
+                  // block: null,
+                  // totalBets: null,
+                  // totalBNB: null,
+                  block: '8595905',
+                  id: '0x5704acfae90dca975cc4af7d7bd8d056e9bee87c',
+                  totalBNB: '0.84',
+                  totalBets: '27',
+                },
+              })
+            })
+          })
+        } catch (e) {
+          reject(e)
+        }
+      }),
+    )
+  }
+  const roundDetailList = await Promise.all(roundDetailPromises)
+
+  const bets = filterClaimed(roundDetailList, claimed).map(transformBetResponse)
+
+  return { account, bets }
+})
 
 export const predictionsSlice = createSlice({
   name: 'predictions',
