@@ -116,17 +116,12 @@ const Predictions = () => {
   }
 
   return (
-    <>
-      <Helmet>
-        <script src="https://s3.tradingview.com/tv.js" type="text/javascript" id="tradingViewWidget" />
-      </Helmet>
-      <SwiperProvider>
-        <Container>
-          {isDesktop ? <Desktop /> : <Mobile />}
-          <CollectWinningsPopup />
-        </Container>
-      </SwiperProvider>
-    </>
+    <SwiperProvider>
+      <Container>
+        {isDesktop ? <Desktop /> : <Mobile />}
+        <CollectWinningsPopup />
+      </Container>
+    </SwiperProvider>
   )
 }
 
