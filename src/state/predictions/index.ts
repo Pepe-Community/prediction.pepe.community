@@ -238,7 +238,6 @@ export const predictionsSlice = createSlice({
       const { rounds, market } = action.payload
       const newRoundData = makeRoundData(rounds)
       const incomingCurrentRound = maxBy(rounds, 'epoch')
-      console.log('Address: ', getPepePredictionAddress())
       console.log('incomingCurrentRound: ', incomingCurrentRound)
       if (state.currentEpoch !== incomingCurrentRound.epoch) {
         // Add new round
