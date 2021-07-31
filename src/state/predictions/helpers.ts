@@ -230,6 +230,7 @@ export const getMarketData = async (): Promise<{
   rounds: Round[]
   market: Market
 }> => {
+  console.log('Address: ', getPredictionsAddress())
   const [[paused], [currentEpoch]] = (await multicallv2(
     predictionsAbi,
     ['paused', 'currentEpoch'].map((name) => ({
