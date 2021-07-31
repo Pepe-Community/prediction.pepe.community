@@ -15,6 +15,7 @@ import {
   makeRoundData,
   getBetByContract,
 } from './helpers'
+import { getPepePredictionAddress } from 'utils/addressHelpers'
 
 const initialState: PredictionsState = {
   status: PredictionStatus.INITIAL,
@@ -237,6 +238,7 @@ export const predictionsSlice = createSlice({
       const { rounds, market } = action.payload
       const newRoundData = makeRoundData(rounds)
       const incomingCurrentRound = maxBy(rounds, 'epoch')
+      console.log('Address: ', getPepePredictionAddress())
       console.log('incomingCurrentRound: ', incomingCurrentRound)
       if (state.currentEpoch !== incomingCurrentRound.epoch) {
         // Add new round
