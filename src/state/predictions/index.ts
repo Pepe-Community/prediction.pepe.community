@@ -5,6 +5,7 @@ import merge from 'lodash/merge'
 import { BIG_ZERO } from 'utils/bigNumber'
 import { Bet, BetPosition, HistoryFilter, Market, PredictionsState, PredictionStatus, Round } from 'state/types'
 import BigNumber from 'bignumber.js'
+import { getPepePredictionAddress } from 'utils/addressHelpers'
 // eslint-disable-next-line import/no-cycle
 import {
   makeFutureRoundResponse,
@@ -15,7 +16,6 @@ import {
   makeRoundData,
   getBetByContract,
 } from './helpers'
-import { getPepePredictionAddress } from 'utils/addressHelpers'
 
 const initialState: PredictionsState = {
   status: PredictionStatus.INITIAL,
