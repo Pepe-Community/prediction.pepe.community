@@ -5,6 +5,7 @@ import merge from 'lodash/merge'
 import { BIG_ZERO } from 'utils/bigNumber'
 import { Bet, BetPosition, HistoryFilter, Market, PredictionsState, PredictionStatus, Round } from 'state/types'
 import BigNumber from 'bignumber.js'
+// eslint-disable-next-line import/no-cycle
 import {
   makeFutureRoundResponse,
   transformRoundResponse,
@@ -38,7 +39,6 @@ const initialState: PredictionsState = {
 export const fetchBet = createAsyncThunk<{ account: string; bet: Bet }, { account: string; id: string; contract: any }>(
   'predictions/fetchBet',
   async ({ account, id, contract }) => {
-    console.log('Fetch bet')
     const response = await getBet(id)
     const r1 = await getBetByContract(contract, id)
     const bet = transformBetResponse(response)
@@ -147,6 +147,14 @@ const getRoundInfo = async (contract: any, roundId: string) => {
   }
 }
 
+export const getLastedRounds = async (contract: any, roundIds: string[]) => {
+  const roundPromises = roundIds.map((id) => {
+    return getRoundInfo(contract, id)
+  })
+
+  return Promise.all(roundPromises)
+}
+
 function filterClaimed(data: any[], claimed: boolean | undefined) {
   if (claimed === undefined) {
     return data
@@ -229,7 +237,7 @@ export const predictionsSlice = createSlice({
       const { rounds, market } = action.payload
       const newRoundData = makeRoundData(rounds)
       const incomingCurrentRound = maxBy(rounds, 'epoch')
-
+      console.log('incomingCurrentRound: ', incomingCurrentRound)
       if (state.currentEpoch !== incomingCurrentRound.epoch) {
         // Add new round
         const newestRound = maxBy(rounds, 'epoch') as Round

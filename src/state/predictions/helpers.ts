@@ -6,6 +6,7 @@ import { multicallv2 } from 'utils/multicall'
 import predictionsAbi from 'config/abi/predictions.json'
 import { getPredictionsAddress } from 'utils/addressHelpers'
 
+import { getPredictionsContract } from 'utils/contractHelpers'
 import {
   BetResponse,
   getRoundBaseFields,
@@ -15,6 +16,8 @@ import {
   TotalWonMarketResponse,
   TotalWonRoundResponse,
 } from './queries'
+// eslint-disable-next-line import/no-cycle
+import { getLastedRounds } from '.'
 
 export enum Result {
   WIN = 'win',
@@ -214,7 +217,15 @@ export const getStaticPredictionsData = async (): Promise<StaticPredictionsData>
     rewardRate: rewardRate.toNumber(),
   }
 }
-
+function getFiveNumbers(input: number) {
+  if (!input) return []
+  const amountOfNumber = input < 5 ? input : 5
+  const result = []
+  for (let i = input; i > input - amountOfNumber; i--) {
+    result.push(i)
+  }
+  return result
+}
 export const getMarketData = async (): Promise<{
   rounds: Round[]
   market: Market
@@ -226,20 +237,11 @@ export const getMarketData = async (): Promise<{
       name,
     })),
   )) as [[boolean], [ethers.BigNumber]]
-
-  const response = (await request(
-    GRAPH_API_PREDICTION,
-    gql`
-      query getMarketData {
-        rounds(first: 5, orderBy: epoch, orderDirection: desc) {
-          ${getRoundBaseFields()}
-        }
-      }
-    `,
-  )) as { rounds: RoundResponse[] }
+  const contract = getPredictionsContract()
+  const rounds: any[] = await getLastedRounds(contract, getFiveNumbers(currentEpoch.toNumber()))
 
   return {
-    rounds: response.rounds.map(transformRoundResponse),
+    rounds: rounds.map(transformRoundResponse),
     market: {
       epoch: currentEpoch.toNumber(),
       paused,
@@ -267,27 +269,6 @@ export const getTotalWon = async (): Promise<number> => {
   return transformTotalWonResponse(response.market, response.rounds)
 }
 
-export const getRound = async (id: string) => {
-  const response = await request(
-    GRAPH_API_PREDICTION,
-    gql`
-      query getRound($id: ID!) {
-        round(id: $id) {
-          ${getRoundBaseFields()}
-          bets {
-           ${getBetBaseFields()}
-            user {
-             ${getUserBaseFields()}
-            }
-          }
-        }
-      }
-  `,
-    { id },
-  )
-  return response.round
-}
-
 type BetHistoryWhereClause = Record<string, string | number | boolean | string[]>
 
 export const getBetHistory = async (
@@ -312,13 +293,13 @@ export const getBetHistory = async (
     `,
     { first, skip, where },
   )
-  return response.bets
+  return []
+  // return response.bets
 }
 
 export const getBetByContract = async (contract: any, id: string) => {
-  const t = await contract.round(id)
-  console.log(t)
-  return t
+  const bet = await contract.round(id)
+  return bet
 }
 
 export const getBet = async (betId: string): Promise<BetResponse> => {
@@ -341,5 +322,6 @@ export const getBet = async (betId: string): Promise<BetResponse> => {
       id: betId.toLowerCase(),
     },
   )
+  console.log(betId, response)
   return response.bet
 }

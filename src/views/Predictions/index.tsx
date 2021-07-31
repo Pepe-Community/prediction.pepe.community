@@ -1,6 +1,5 @@
 import React, { useEffect, useRef } from 'react'
 import { useWeb3React } from '@web3-react/core'
-import { Helmet } from 'react-helmet-async'
 import { useMatchBreakpoints, useModal } from '@pancakeswap/uikit'
 import { useAppDispatch } from 'state'
 import { useGetPredictionsStatus, useInitialBlock, useIsChartPaneOpen } from 'state/hooks'
