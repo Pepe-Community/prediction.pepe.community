@@ -230,7 +230,6 @@ export const getMarketData = async (): Promise<{
   rounds: Round[]
   market: Market
 }> => {
-  console.log('Address: ', getPredictionsAddress())
   const [[paused], [currentEpoch]] = (await multicallv2(
     predictionsAbi,
     ['paused', 'currentEpoch'].map((name) => ({
@@ -238,6 +237,7 @@ export const getMarketData = async (): Promise<{
       name,
     })),
   )) as [[boolean], [ethers.BigNumber]]
+  console.log({ paused })
   const contract = getPredictionsContract()
   const rounds: any[] = await getLastedRounds(contract, getFiveNumbers(currentEpoch.toNumber()))
 
@@ -304,6 +304,7 @@ export const getBetByContract = async (contract: any, id: string) => {
 }
 
 export const getBet = async (betId: string): Promise<BetResponse> => {
+  console.log('Get bet')
   const response = await request(
     GRAPH_API_PREDICTION,
     gql`

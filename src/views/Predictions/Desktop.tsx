@@ -143,13 +143,13 @@ const Desktop: React.FC = () => {
       <StyledDesktop>
         <SplitWrapper ref={splitWrapperRef}>
           <PositionPane>
-            {/* {status === PredictionStatus.ERROR && <ErrorNotification />}
+            {status === PredictionStatus.ERROR && <ErrorNotification />}
             {status === PredictionStatus.PAUSED && <PauseNotification />}
-            {status === PredictionStatus.LIVE && ( */}
-            <div>
-              <Positions />
-            </div>
-            {/* )} */}
+            {status === PredictionStatus.LIVE && (
+              <div>
+                <Positions />
+              </div>
+            )}
           </PositionPane>
           <Gutter ref={gutterRef} />
         </SplitWrapper>

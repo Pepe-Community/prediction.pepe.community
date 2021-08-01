@@ -41,6 +41,7 @@ export const fetchBet = createAsyncThunk<{ account: string; bet: Bet }, { accoun
   'predictions/fetchBet',
   async ({ account, id, contract }) => {
     const response = await getBet(id)
+    console.log(id)
     const r1 = await getBetByContract(contract, id)
     const bet = transformBetResponse(response)
     return { account, bet }
@@ -238,7 +239,7 @@ export const predictionsSlice = createSlice({
       const { rounds, market } = action.payload
       const newRoundData = makeRoundData(rounds)
       const incomingCurrentRound = maxBy(rounds, 'epoch')
-      console.log('incomingCurrentRound: ', incomingCurrentRound)
+
       if (state.currentEpoch !== incomingCurrentRound.epoch) {
         // Add new round
         const newestRound = maxBy(rounds, 'epoch') as Round

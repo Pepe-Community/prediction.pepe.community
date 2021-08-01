@@ -65,7 +65,7 @@ const OpenRoundCard: React.FC<OpenRoundCardProps> = ({
       return false
     }
 
-    if (round.lockPrice !== null) {
+    if (round.lockPrice !== 0 && round.lockPrice !== null) {
       return false
     }
 
