@@ -140,7 +140,6 @@ const SetPositionCard: React.FC<SetPositionCardProps> = ({ position, togglePosit
     const decimalValue = getDecimalAmount(valueAsBn)
 
     const tx = await predictionsContract[betMethod]({ value: decimalValue.toString(), gasPrice })
-    console.log(tx)
     setIsTxPending(true)
     const receipt = await tx.wait()
     if (receipt.status) {

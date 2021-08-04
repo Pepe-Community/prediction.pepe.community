@@ -6,6 +6,7 @@ import { BIG_ZERO } from 'utils/bigNumber'
 import { Bet, BetPosition, HistoryFilter, Market, PredictionsState, PredictionStatus, Round } from 'state/types'
 import BigNumber from 'bignumber.js'
 import { getPepePredictionAddress } from 'utils/addressHelpers'
+import Web3 from 'web3'
 // eslint-disable-next-line import/no-cycle
 import {
   makeFutureRoundResponse,
@@ -41,7 +42,7 @@ export const fetchBet = createAsyncThunk<{ account: string; bet: Bet }, { accoun
   'predictions/fetchBet',
   async ({ account, id, contract }) => {
     const response = await getBet(id)
-    console.log(id)
+
     const r1 = await getBetByContract(contract, id)
     const bet = transformBetResponse(response)
     return { account, bet }
