@@ -14,7 +14,6 @@ import { fetchCurrentBets, initialize, setPredictionStatus } from 'state/predict
 import { HistoryFilter, PredictionStatus } from 'state/types'
 import usePersistState from 'hooks/usePersistState'
 import PageLoader from 'components/PageLoader'
-import usePollOraclePrice from './hooks/usePollOraclePrice'
 import usePollRoundData from './hooks/usePollRoundData'
 import Container from './components/Container'
 import CollectWinningsPopup from './components/CollectWinningsPopup'

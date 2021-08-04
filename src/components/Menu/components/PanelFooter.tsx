@@ -3,7 +3,6 @@ import styled from 'styled-components'
 import { IconButton } from '@pancakeswap/uikit'
 import { MENU_ENTRY_HEIGHT } from '../config'
 import { PanelProps, PushedProps } from '../types'
-import CakePrice from './CakePrice'
 import ThemeSwitcher from './ThemeSwitcher'
 import SocialLinks from './SocialLinks'
 import LangSelector from './LangSelector'
@@ -34,16 +33,7 @@ const SocialEntry = styled.div`
   padding: 0 16px;
 `
 
-const PanelFooter: React.FC<Props> = ({
-  isPushed,
-  pushNav,
-  toggleTheme,
-  isDark,
-  cakePriceUsd,
-  currentLang,
-  langs,
-  setLang,
-}) => {
+const PanelFooter: React.FC<Props> = ({ isPushed, pushNav, toggleTheme, isDark, currentLang, langs, setLang }) => {
   if (!isPushed) {
     return (
       <Container>
@@ -57,7 +47,6 @@ const PanelFooter: React.FC<Props> = ({
   return (
     <Container>
       <SocialEntry>
-        <CakePrice cakePriceUsd={cakePriceUsd} />
         <SocialLinks />
       </SocialEntry>
       <SettingsEntry>

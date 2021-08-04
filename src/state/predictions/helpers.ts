@@ -237,7 +237,7 @@ export const getMarketData = async (): Promise<{
       name,
     })),
   )) as [[boolean], [ethers.BigNumber]]
-  console.log({ paused })
+
   const contract = getPredictionsContract()
   const rounds: any[] = await getLastedRounds(contract, getFiveNumbers(currentEpoch.toNumber()))
 
@@ -298,13 +298,12 @@ export const getBetHistory = async (
   // return response.bets
 }
 
-export const getBetByContract = async (contract: any, id: string) => {
-  const bet = await contract.round(id)
+export const getBetByContract = async (contract: any, id: string, account: string) => {
+  const bet = await contract.ledger(id, account)
   return bet
 }
 
 export const getBet = async (betId: string): Promise<BetResponse> => {
-  console.log('Get bet')
   const response = await request(
     GRAPH_API_PREDICTION,
     gql`
@@ -324,6 +323,5 @@ export const getBet = async (betId: string): Promise<BetResponse> => {
       id: betId.toLowerCase(),
     },
   )
-  console.log(betId, response)
   return response.bet
 }

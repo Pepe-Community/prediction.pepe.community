@@ -5,7 +5,6 @@ import merge from 'lodash/merge'
 import { BIG_ZERO } from 'utils/bigNumber'
 import { Bet, BetPosition, HistoryFilter, Market, PredictionsState, PredictionStatus, Round } from 'state/types'
 import BigNumber from 'bignumber.js'
-import { getPepePredictionAddress } from 'utils/addressHelpers'
 import Web3 from 'web3'
 // eslint-disable-next-line import/no-cycle
 import {
@@ -43,7 +42,8 @@ export const fetchBet = createAsyncThunk<{ account: string; bet: Bet }, { accoun
   async ({ account, id, contract }) => {
     const response = await getBet(id)
 
-    const r1 = await getBetByContract(contract, id)
+    const r1 = await getBetByContract(contract, id, account)
+    console.log({ r1 })
     const bet = transformBetResponse(response)
     return { account, bet }
   },
@@ -93,7 +93,6 @@ const getEvent = async (contract: any, account: string, roundId: number, startBl
     const event = await contract.queryFilter(filter, startBlock, startBlock + blockLimit)
     return event
   } catch (e) {
-    console.log(e)
     return getEvent(contract, account, roundId, startBlock + blockLimit, lastedBlock)
   }
 }
@@ -103,7 +102,7 @@ const getLedgerByRoundId = async (contract: any, account: string, roundId: strin
     const [position, amount, _claimed] = await contract.ledger(roundId, account)
     return {
       position: position === 0 ? BetPosition.BULL : BetPosition.BEAR,
-      amount: (amount as BigNumber).div(10 ** 9).toNumber() / 10 ** 9,
+      amount: ((amount as BigNumber).div(10 ** 9).toNumber() / 10 ** 9).toFixed(3),
       claimed: _claimed,
       claimedHash: '0xa4860fd610fc29455ece7e6b30649884009fe428d9b42ad651c85187585853a6',
       hash: '0x9f456e9ba2f15dcf79f733c2c93a6e4c3f288af27eed1e388971046c89b01be2',
@@ -116,20 +115,12 @@ const getLedgerByRoundId = async (contract: any, account: string, roundId: strin
 
 const getRoundInfo = async (contract: any, roundId: string) => {
   try {
-    const [
-      id,
-      startBlock,
-      lockBlock,
-      endBlock,
-      lockPrice,
-      closePrice,
-      totalAmount,
-      bullAmount,
-      bearAmount,
-      rewardBaseCalAmount,
-      rewardAmount,
-      oracleCalled,
-    ] = await contract.rounds(roundId)
+    const [id, startBlock, lockBlock, endBlock, lockPrice, closePrice, totalAmount, bullAmount, bearAmount] =
+      await contract.rounds(roundId)
+    const web3 = new Web3(Web3.givenProvider)
+    const currentBlock = await web3.eth.getBlockNumber()
+    const failed = currentBlock > endBlock.toNumber()
+
     return {
       id: id.toString(),
       epoch: id.toString(),
@@ -141,12 +132,23 @@ const getRoundInfo = async (contract: any, roundId: string) => {
       totalAmount: (totalAmount.div(10 ** 8).toNumber() / 10 ** 10).toString(),
       bullAmount: (bullAmount.div(10 ** 8).toNumber() / 10 ** 10).toString(),
       bearAmount: (bearAmount.div(10 ** 8).toNumber() / 10 ** 10).toString(),
-      failed: !oracleCalled,
+      failed,
       position: lockPrice.gt(closePrice) ? BetPosition.BEAR : BetPosition.BULL,
     }
   } catch (e) {
     console.log(e)
     return null
+  }
+}
+const getUserInfo = async (contract: any, account: string) => {
+  const web3 = new Web3(Web3.givenProvider)
+  const currentBlock = await web3.eth.getBlockNumber()
+  const totalBNB = await web3.eth.getBalance(account)
+  return {
+    address: account,
+    block: currentBlock,
+    totalBNB: new BigNumber(totalBNB).div(10 ** 9).toNumber() / 10 ** 9,
+    totalBets: 0,
   }
 }
 
@@ -171,11 +173,6 @@ export const fetchHistory = createAsyncThunk<
   { account: string; bets: Bet[] },
   { account: string; claimed?: boolean; contract?: any }
 >('predictions/fetchHistory', async ({ account, claimed, contract }) => {
-  // const response = await getBetHistory({
-  //   user: account.toLowerCase(),
-  //   claimed,
-  // })
-
   const [roundsNum] = await contract.getUserRounds(account, 0, 100)
   const roundDetailPromises = []
   for (let i = 0; i < roundsNum.length; i++) {
@@ -184,19 +181,12 @@ export const fetchHistory = createAsyncThunk<
         try {
           getLedgerByRoundId(contract, account, roundsNum[i]).then((ledger) => {
             getRoundInfo(contract, roundsNum[i].toNumber()).then((value) => {
-              resolve({
-                ...ledger,
-                round: value,
-                user: {
-                  address: account,
-                  // block: null,
-                  // totalBets: null,
-                  // totalBNB: null,
-                  block: '8595905',
-                  id: '0x5704acfae90dca975cc4af7d7bd8d056e9bee87c',
-                  totalBNB: '0.84',
-                  totalBets: '27',
-                },
+              getUserInfo(contract, account).then((user) => {
+                resolve({
+                  ...ledger,
+                  round: value,
+                  user,
+                })
               })
             })
           })

@@ -333,7 +333,6 @@ export const usePriceCakeBusd = (): BigNumber => {
 }
 
 export const usePepePriceBusd = (): number => {
-  const { account } = useWeb3React()
   const [price, setPrice] = useState(0)
   const pepeContract = usePepe()
   const pancakeRouter = usePancakeRouter()
@@ -345,13 +344,13 @@ export const usePepePriceBusd = (): number => {
       try {
         if (!pepeContract || !pancakeRouter) return
         const PepeAddress = await pepeContract.address
-        const [_, pepePricePerBillion] = await pancakeRouter.getAmountsOut('1000000000000000000', [
+        const [, pepePricePerBillion] = await pancakeRouter.getAmountsOut('1000000000000000000', [
           PepeAddress,
           '0xe9e7cea3dedca5984780bafc599bd69add087d56',
         ])
         setPrice(new BigNumber(pepePricePerBillion.toString()).div(10 ** 9).toNumber() / 10 ** 9)
       } catch (e) {
-        console.log(e)
+        // Ignore
       }
     })()
   }, [pancakeRouter, pepeContract])
@@ -460,7 +459,7 @@ export const useGetBetByRoundId = (account: string, roundId: string) => {
   if (!bets[account][roundId]) {
     return null
   }
-
+  console.log(bets[account][roundId])
   return bets[account][roundId]
 }
 
@@ -537,12 +536,11 @@ export const useGetLastedBTCPrice = () => {
         const _price: BigNumber = await pepePrediction._getPriceFromPancakeSwap()
         setPrice(_price.toNumber() / 10 ** 10)
       } catch (e) {
-        console.log(e)
+        // Ignore
       }
     }, 12000)
 
     return () => {
-      console.log('Unmount')
       clearInterval(interval)
     }
   }, [pepePrediction])

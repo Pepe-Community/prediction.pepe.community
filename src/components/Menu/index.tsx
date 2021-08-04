@@ -4,7 +4,7 @@ import { languageList } from 'config/localization/languages'
 import { useTranslation } from 'contexts/Localization'
 import useTheme from 'hooks/useTheme'
 import useAuth from 'hooks/useAuth'
-import { usePepePriceBusd, useProfile } from 'state/hooks'
+import { useProfile } from 'state/hooks'
 import BaseMenu from './BaseMenu'
 import config from './config'
 
@@ -14,7 +14,6 @@ const Menu = (props) => {
   const { isDark, toggleTheme } = useTheme()
   const { profile } = useProfile()
   const { currentLanguage, setLanguage, t } = useTranslation()
-  const pepePricePerBillion = usePepePriceBusd()
   return (
     <BaseMenu
       account={account}
@@ -25,7 +24,6 @@ const Menu = (props) => {
       currentLang={currentLanguage.code}
       langs={languageList}
       setLang={setLanguage}
-      cakePriceUsd={pepePricePerBillion}
       links={config(t)}
       profile={{
         username: profile?.username,

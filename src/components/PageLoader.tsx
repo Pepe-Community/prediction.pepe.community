@@ -1,6 +1,5 @@
 import React from 'react'
 import styled from 'styled-components'
-import { Spinner } from '@pancakeswap/uikit'
 import BounceLoader from 'react-spinners/BounceLoader'
 import Page from './layout/Page'
 
