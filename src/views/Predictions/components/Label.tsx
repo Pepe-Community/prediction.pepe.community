@@ -1,11 +1,12 @@
 import React, { useEffect } from 'react'
 import { useCountUp } from 'react-countup'
 import styled from 'styled-components'
-import { BnbUsdtPairTokenIcon, Box, Card, PocketWatchIcon, Text } from '@pancakeswap/uikit'
-import { useGetLastedBTCPrice, useGetLastOraclePrice } from 'state/hooks'
+import { Box, Card, PocketWatchIcon, Text } from '@pancakeswap/uikit'
+import { useGetLastedBTCPrice } from 'state/hooks'
 import { useTranslation } from 'contexts/Localization'
 import { formatRoundTime } from '../helpers'
 import useRoundCountdown from '../hooks/useRoundCountdown'
+import BTCIcon from './BTCIcon'
 
 const Token = styled(Box)`
   margin-top: -24px;
@@ -71,6 +72,10 @@ const Label = styled(Card)<{ dir: 'left' | 'right' }>`
   }
 `
 
+const BitcoinIcon = styled(BTCIcon)`
+  padding-right: 8px;
+`
+
 export const PricePairLabel: React.FC = () => {
   const btcPrice = useGetLastedBTCPrice()
   const { countUp, update } = useCountUp({
@@ -79,9 +84,6 @@ export const PricePairLabel: React.FC = () => {
     duration: 1,
     decimals: 3,
   })
-  useEffect(() => {
-    console.log('Price: ', btcPrice)
-  }, [btcPrice])
 
   useEffect(() => {
     update(btcPrice)
@@ -89,8 +91,8 @@ export const PricePairLabel: React.FC = () => {
 
   return (
     <Box pl="24px" position="relative" display="inline-block">
-      <Token left={0}>
-        <BnbUsdtPairTokenIcon />
+      <Token left={-8}>
+        <BitcoinIcon />
       </Token>
       <Label dir="left">
         <Title bold textTransform="uppercase">

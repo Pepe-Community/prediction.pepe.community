@@ -1,6 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
 import { Spinner } from '@pancakeswap/uikit'
+import BounceLoader from 'react-spinners/BounceLoader'
 import Page from './layout/Page'
 
 const Wrapper = styled(Page)`
@@ -12,7 +13,7 @@ const Wrapper = styled(Page)`
 const PageLoader: React.FC = () => {
   return (
     <Wrapper>
-      <Spinner />
+      <BounceLoader color="#31D0AA" loading size={150} />
     </Wrapper>
   )
 }

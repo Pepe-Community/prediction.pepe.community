@@ -45,7 +45,7 @@ const Logo: React.FC<Props> = ({ isPushed, togglePush, href }) => {
         )}
       </MenuButton>
 
-      <StyledLink as="a" href={href} aria-label="Pancake home page">
+      <StyledLink as="a" href={href} aria-label="Pepe home page">
         {innerLogo}
       </StyledLink>
     </Flex>

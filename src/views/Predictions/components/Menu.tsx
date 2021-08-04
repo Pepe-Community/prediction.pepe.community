@@ -60,7 +60,7 @@ const Menu = () => {
             <IconButton
               variant="subtle"
               as="a"
-              href="https://docs.pancakeswap.finance/products/prediction"
+              href="https://docs.pepe.community/price-prediction-game"
               target="_blank"
               rel="noreferrer noopener"
             >
