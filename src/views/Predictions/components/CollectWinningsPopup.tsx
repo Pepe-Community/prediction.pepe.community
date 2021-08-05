@@ -4,10 +4,11 @@ import styled, { css, keyframes } from 'styled-components'
 import { Button, CloseIcon, IconButton, TrophyGoldIcon } from '@pancakeswap/uikit'
 import { CSSTransition } from 'react-transition-group'
 import { useTranslation } from 'contexts/Localization'
-import { getBetHistory } from 'state/predictions/helpers'
+import { getBetHistory, getUnClaimedBets } from 'state/predictions/helpers'
 import { useGetPredictionsStatus, useIsHistoryPaneOpen } from 'state/hooks'
 import { useAppDispatch } from 'state'
 import { setHistoryPaneState } from 'state/predictions'
+import { getPredictionsContract } from 'utils/contractHelpers'
 
 /**
  * @see https://github.com/animate-css/animate.css/tree/main/source
@@ -141,8 +142,9 @@ const CollectWinningsPopup = () => {
   useEffect(() => {
     let isCancelled = false
     if (account) {
+      const contract = getPredictionsContract()
       timer.current = setInterval(async () => {
-        const bets = await getBetHistory({ user: account.toLowerCase(), claimed: false })
+        const bets = await getUnClaimedBets(account.toLowerCase(), contract)
 
         if (!isCancelled) {
           // Filter out bets that were not winners

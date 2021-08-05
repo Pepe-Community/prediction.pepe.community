@@ -41,11 +41,8 @@ const initialState: PredictionsState = {
 export const fetchBet = createAsyncThunk<{ account: string; bet: Bet }, { account: string; id: string; contract: any }>(
   'predictions/fetchBet',
   async ({ account, id, contract }) => {
-    console.log('ok')
     const response = await getBet(id)
-
-    const r1 = await getBetByContract(contract, id, account)
-    console.log({ r1 })
+    // const r1 = await getBetByContract(contract, id, account)
     const bet = transformBetResponse(response)
     return { account, bet }
   },
@@ -55,10 +52,7 @@ export const fetchRoundBet = createAsyncThunk<
   { account: string; roundId: string; bet: Bet },
   { account: string; roundId: string }
 >('predictions/fetchRoundBet', async ({ account, roundId }) => {
-  const betResponses = await getBetHistory({
-    user: account.toLowerCase(),
-    round: roundId,
-  })
+  const betResponses = await getBetHistoryByRoundIds(account.toLowerCase(), [roundId])
 
   // This should always return 0 or 1 bet because a user can only place
   // one bet per round
@@ -96,7 +90,7 @@ const getEvent = async (contract: any, account: string, roundId: number, startBl
   }
 }
 
-const getLedgerByRoundId = async (contract: any, account: string, roundId: string) => {
+export const getLedgerByRoundId = async (contract: any, account: string, roundId: string) => {
   try {
     const [position, amount, _claimed] = await contract.ledger(roundId, account)
     return {
@@ -159,7 +153,7 @@ export const getLastedRounds = async (contract: any, roundIds: string[]) => {
   return Promise.all(roundPromises)
 }
 
-function filterClaimed(data: any[], claimed: boolean | undefined) {
+export function filterClaimed(data: any[], claimed: boolean | undefined) {
   if (claimed === undefined) {
     return data
   }

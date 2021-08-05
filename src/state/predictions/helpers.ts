@@ -17,7 +17,7 @@ import {
   TotalWonRoundResponse,
 } from './queries'
 // eslint-disable-next-line import/no-cycle
-import { getLastedRounds, getRoundInfo, getUserInfo } from '.'
+import { filterClaimed, getLastedRounds, getLedgerByRoundId, getRoundInfo, getUserInfo } from '.'
 
 export enum Result {
   WIN = 'win',
@@ -294,6 +294,35 @@ export const getBetHistoryByRoundIds = async (account: string, roundIds: string[
   }
   const result = await Promise.all(promises)
   return result
+}
+export const getUnClaimedBets = async (account: string, contract: any) => {
+  const [roundsNum] = await contract.getUserRounds(account, 0, 100)
+  const roundDetailPromises = []
+  for (let i = 0; i < roundsNum.length; i++) {
+    roundDetailPromises.push(
+      new Promise((resolve, reject) => {
+        try {
+          getLedgerByRoundId(contract, account, roundsNum[i]).then((ledger) => {
+            getRoundInfo(contract, roundsNum[i].toNumber()).then((value) => {
+              getUserInfo(account).then((user) => {
+                resolve({
+                  ...ledger,
+                  round: value,
+                  user,
+                })
+              })
+            })
+          })
+        } catch (e) {
+          reject(e)
+        }
+      }),
+    )
+  }
+  const roundDetailList = await Promise.all(roundDetailPromises)
+  const bets = filterClaimed(roundDetailList, false).map(transformBetResponse)
+
+  return bets
 }
 export const getBetHistory = async (
   where: BetHistoryWhereClause = {},
