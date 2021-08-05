@@ -32,6 +32,10 @@ const SocialEntry = styled.div`
   height: ${MENU_ENTRY_HEIGHT}px;
   padding: 0 16px;
 `
+const EmptySpace = styled.div`
+  display: flex;
+  flex: 1;
+`
 
 const PanelFooter: React.FC<Props> = ({ isPushed, pushNav, toggleTheme, isDark, currentLang, langs, setLang }) => {
   if (!isPushed) {
@@ -47,6 +51,7 @@ const PanelFooter: React.FC<Props> = ({ isPushed, pushNav, toggleTheme, isDark, 
   return (
     <Container>
       <SocialEntry>
+        <EmptySpace />
         <SocialLinks />
       </SocialEntry>
       <SettingsEntry>
