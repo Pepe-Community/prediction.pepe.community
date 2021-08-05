@@ -83,7 +83,11 @@ const RoundCard: React.FC<RoundCardProps> = ({ round, previousRound }) => {
       />
     )
   }
+  if (epoch === currentEpoch) {
+    console.log(epoch)
 
+    console.log(bet)
+  }
   // Next (open) round
   if ((epoch === currentEpoch && lockPrice === 0) || isPrevRoundExpiredWithoutLock) {
     return (

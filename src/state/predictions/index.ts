@@ -15,6 +15,7 @@ import {
   getBet,
   makeRoundData,
   getBetByContract,
+  getBetHistoryByRoundIds,
 } from './helpers'
 
 const initialState: PredictionsState = {
@@ -40,6 +41,7 @@ const initialState: PredictionsState = {
 export const fetchBet = createAsyncThunk<{ account: string; bet: Bet }, { account: string; id: string; contract: any }>(
   'predictions/fetchBet',
   async ({ account, id, contract }) => {
+    console.log('ok')
     const response = await getBet(id)
 
     const r1 = await getBetByContract(contract, id, account)
@@ -75,10 +77,7 @@ export const fetchCurrentBets = createAsyncThunk<
   { account: string; bets: Bet[] },
   { account: string; roundIds: string[] }
 >('predictions/fetchCurrentBets', async ({ account, roundIds }) => {
-  const betResponses = await getBetHistory({
-    user: account.toLowerCase(),
-    round_in: roundIds,
-  })
+  const betResponses = await getBetHistoryByRoundIds(account.toLowerCase(), roundIds)
 
   return { account, bets: betResponses.map(transformBetResponse) }
 })
@@ -113,7 +112,7 @@ const getLedgerByRoundId = async (contract: any, account: string, roundId: strin
   }
 }
 
-const getRoundInfo = async (contract: any, roundId: string) => {
+export const getRoundInfo = async (contract: any, roundId: string) => {
   try {
     const [id, startBlock, lockBlock, endBlock, lockPrice, closePrice, totalAmount, bullAmount, bearAmount] =
       await contract.rounds(roundId)
@@ -140,7 +139,7 @@ const getRoundInfo = async (contract: any, roundId: string) => {
     return null
   }
 }
-const getUserInfo = async (contract: any, account: string) => {
+export const getUserInfo = async (account: string) => {
   const web3 = new Web3(Web3.givenProvider)
   const currentBlock = await web3.eth.getBlockNumber()
   const totalBNB = await web3.eth.getBalance(account)
@@ -181,7 +180,7 @@ export const fetchHistory = createAsyncThunk<
         try {
           getLedgerByRoundId(contract, account, roundsNum[i]).then((ledger) => {
             getRoundInfo(contract, roundsNum[i].toNumber()).then((value) => {
-              getUserInfo(contract, account).then((user) => {
+              getUserInfo(account).then((user) => {
                 resolve({
                   ...ledger,
                   round: value,

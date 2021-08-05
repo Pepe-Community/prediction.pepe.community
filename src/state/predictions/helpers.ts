@@ -17,7 +17,7 @@ import {
   TotalWonRoundResponse,
 } from './queries'
 // eslint-disable-next-line import/no-cycle
-import { getLastedRounds } from '.'
+import { getLastedRounds, getRoundInfo, getUserInfo } from '.'
 
 export enum Result {
   WIN = 'win',
@@ -272,6 +272,29 @@ export const getTotalWon = async (): Promise<number> => {
 
 type BetHistoryWhereClause = Record<string, string | number | boolean | string[]>
 
+export const getBetHistoryByRoundIds = async (account: string, roundIds: string[]): Promise<BetResponse[]> => {
+  const contract = getPredictionsContract()
+  const promises = []
+  for (let i = 0; i < roundIds.length; i++) {
+    promises.push(
+      new Promise((resolve) => {
+        getBetByContract(contract, roundIds[i], account).then((bet) => {
+          getUserInfo(account).then((user) => {
+            getRoundInfo(contract, roundIds[i]).then((round) => {
+              resolve({
+                ...bet,
+                user,
+                round,
+              })
+            })
+          })
+        })
+      }),
+    )
+  }
+  const result = await Promise.all(promises)
+  return result
+}
 export const getBetHistory = async (
   where: BetHistoryWhereClause = {},
   first = 1000,
@@ -299,8 +322,12 @@ export const getBetHistory = async (
 }
 
 export const getBetByContract = async (contract: any, id: string, account: string) => {
-  const bet = await contract.ledger(id, account)
-  return bet
+  const [position, amount, claimed] = await contract.ledger(id, account)
+  return {
+    position: position === 0 ? BetPosition.BULL : BetPosition.BEAR,
+    amount: amount.div(10 ** 9).toNumber() / 10 ** 9,
+    claimed,
+  }
 }
 
 export const getBet = async (betId: string): Promise<BetResponse> => {
