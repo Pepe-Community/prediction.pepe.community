@@ -8,7 +8,7 @@ import styled from 'styled-components'
 import { Bet, BetPosition } from 'state/types'
 import { fetchBet } from 'state/predictions'
 import { Result } from 'state/predictions/helpers'
-import { getBscScanTransactionUrl } from 'utils/bscscan'
+import { getBscScanAddressUrl } from 'utils/bscscan'
 import { usePepePrediction } from 'hooks/useContract'
 import useIsRefundable from '../../hooks/useIsRefundable'
 import { formatBnb, getNetPayout } from '../../helpers'
@@ -133,7 +133,7 @@ const BetResult: React.FC<BetResultProps> = ({ bet, result }) => {
         )}
         {bet.claimed && (
           <Flex justifyContent="center">
-            <LinkExternal href={getBscScanTransactionUrl(bet.claimedHash)} mb="16px">
+            <LinkExternal href={getBscScanAddressUrl(bet.user.address)} mb="16px">
               {t('View on BscScan')}
             </LinkExternal>
           </Flex>
