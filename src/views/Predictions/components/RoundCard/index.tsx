@@ -29,8 +29,7 @@ const RoundCard: React.FC<RoundCardProps> = ({ round, previousRound }) => {
   const bearMultiplier = getMultiplier(totalAmount, bearAmount)
 
   useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-extra-semi
-    ;(async () => {
+    const interval = setInterval(async () => {
       try {
         if (previousRound?.epoch === currentEpoch) {
           const web3 = new Web3(Web3.givenProvider)
@@ -45,13 +44,15 @@ const RoundCard: React.FC<RoundCardProps> = ({ round, previousRound }) => {
           }
         }
       } catch (e) {
-        console.log(e)
+        // console.log(e)
       }
-    })()
+    }, 12000)
+    return () => {
+      clearInterval(interval)
+    }
   }, [currentEpoch, previousRound?.epoch, previousRound?.lockBlock])
   useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-extra-semi
-    ;(async () => {
+    const interval = setInterval(async () => {
       try {
         if (currentEpoch && lockBlock) {
           const web3 = new Web3(Web3.givenProvider)
@@ -62,13 +63,18 @@ const RoundCard: React.FC<RoundCardProps> = ({ round, previousRound }) => {
 
             if (isBefore(time, new Date())) {
               setIsCurrentRoundExpiredWithoutLock(true)
+            } else {
+              setIsCurrentRoundExpiredWithoutLock(false)
             }
           }
         }
       } catch (e) {
-        console.log(e)
+        // console.log(e)
       }
-    })()
+    }, 12000)
+    return () => {
+      clearInterval(interval)
+    }
   }, [currentEpoch, lockBlock])
 
   if (isCurrentRoundExpiredWithoutLock) {
@@ -83,11 +89,7 @@ const RoundCard: React.FC<RoundCardProps> = ({ round, previousRound }) => {
       />
     )
   }
-  if (epoch === currentEpoch) {
-    console.log(epoch)
 
-    console.log(bet)
-  }
   // Next (open) round
   if ((epoch === currentEpoch && lockPrice === 0) || isPrevRoundExpiredWithoutLock) {
     return (

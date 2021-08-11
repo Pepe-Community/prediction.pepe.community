@@ -270,8 +270,6 @@ export const getTotalWon = async (): Promise<number> => {
   return transformTotalWonResponse(response.market, response.rounds)
 }
 
-type BetHistoryWhereClause = Record<string, string | number | boolean | string[]>
-
 export const getBetHistoryByRoundIds = async (account: string, roundIds: string[]): Promise<BetResponse[]> => {
   const contract = getPredictionsContract()
   const promises = []
@@ -323,31 +321,6 @@ export const getUnClaimedBets = async (account: string, contract: any) => {
   const bets = filterClaimed(roundDetailList, false).map(transformBetResponse)
 
   return bets
-}
-export const getBetHistory = async (
-  where: BetHistoryWhereClause = {},
-  first = 1000,
-  skip = 0,
-): Promise<BetResponse[]> => {
-  const response = await request(
-    GRAPH_API_PREDICTION,
-    gql`
-      query getBetHistory($first: Int!, $skip: Int!, $where: Bet_filter) {
-        bets(first: $first, skip: $skip, where: $where) {
-          ${getBetBaseFields()}
-          round {
-            ${getRoundBaseFields()}
-          }
-          user {
-            ${getUserBaseFields()}
-          }
-        }
-      }
-    `,
-    { first, skip, where },
-  )
-  return []
-  // return response.bets
 }
 
 export const getBetByContract = async (contract: any, id: string, account: string) => {

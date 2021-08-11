@@ -459,7 +459,7 @@ export const useGetBetByRoundId = (account: string, roundId: string) => {
   if (!bets[account][roundId]) {
     return null
   }
-  console.log(bets[account][roundId])
+
   return bets[account][roundId]
 }
 

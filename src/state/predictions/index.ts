@@ -10,11 +10,9 @@ import Web3 from 'web3'
 import {
   makeFutureRoundResponse,
   transformRoundResponse,
-  getBetHistory,
   transformBetResponse,
   getBet,
   makeRoundData,
-  getBetByContract,
   getBetHistoryByRoundIds,
 } from './helpers'
 

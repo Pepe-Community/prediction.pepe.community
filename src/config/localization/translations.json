@@ -903,5 +903,7 @@
   "Amount to collect": "Amount to collect",
   "Your winnings": "Your winnings",
   "Includes your original position and your winnings, minus the %fee% fee.": "Includes your original position and your winnings, minus the %fee% fee.",
-  "Your funds have been staked in the farm": "Your funds have been staked in the farm"
+  "Your funds have been staked in the farm": "Your funds have been staked in the farm",
+  "Game is pause": "Game is pause",
+  "Restart now": "Restart now"
 }
