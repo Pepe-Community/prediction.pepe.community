@@ -10,7 +10,7 @@ export interface UserResponse {
 export interface BetResponse {
   id: string
   hash: string
-  amount: string
+  amount: string | number
   position: string
   claimed: boolean
   claimedHash: string
@@ -87,7 +87,7 @@ export const getRoundBaseFields = () => `
 
 export const getBetBaseFields = () => `
   id
-  hash  
+  hash
   amount
   position
   claimed

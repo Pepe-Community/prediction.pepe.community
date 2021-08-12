@@ -11,7 +11,6 @@ import {
   makeFutureRoundResponse,
   transformRoundResponse,
   transformBetResponse,
-  getBet,
   makeRoundData,
   getBetHistoryByRoundIds,
 } from './helpers'
@@ -38,10 +37,12 @@ const initialState: PredictionsState = {
 // Thunks
 export const fetchBet = createAsyncThunk<{ account: string; bet: Bet }, { account: string; id: string; contract: any }>(
   'predictions/fetchBet',
-  async ({ account, id, contract }) => {
-    const response = await getBet(id)
-    // const r1 = await getBetByContract(contract, id, account)
-    const bet = transformBetResponse(response)
+  async ({ account, id }) => {
+    const response = await getBetHistoryByRoundIds(account, [id])
+    if (!response[0]) {
+      return { account, bet: null }
+    }
+    const bet = transformBetResponse(response[0])
     return { account, bet }
   },
 )
@@ -84,7 +85,8 @@ const getEvent = async (contract: any, account: string, roundId: number, startBl
     const event = await contract.queryFilter(filter, startBlock, startBlock + blockLimit)
     return event
   } catch (e) {
-    return getEvent(contract, account, roundId, startBlock + blockLimit, lastedBlock)
+    const event = await getEvent(contract, account, roundId, startBlock + blockLimit, lastedBlock)
+    return event
   }
 }
 
@@ -110,7 +112,20 @@ export const getRoundInfo = async (contract: any, roundId: string) => {
       await contract.rounds(roundId)
     const web3 = new Web3(Web3.givenProvider)
     const currentBlock = await web3.eth.getBlockNumber()
-    const failed = currentBlock > endBlock.toNumber()
+    const bufferBlocks = await contract.bufferBlocks()
+
+    const failed = (() => {
+      if (startBlock.toNumber() === 0) {
+        return false
+      }
+      if (currentBlock > lockBlock.toNumber() + bufferBlocks.toNumber() && lockPrice.toNumber() === 0) {
+        return true
+      }
+      if (currentBlock > endBlock.toNumber()) {
+        return closePrice.toNumber() === 0
+      }
+      return false
+    })()
 
     return {
       id: id.toString(),
@@ -124,10 +139,12 @@ export const getRoundInfo = async (contract: any, roundId: string) => {
       bullAmount: (bullAmount.div(10 ** 8).toNumber() / 10 ** 10).toString(),
       bearAmount: (bearAmount.div(10 ** 8).toNumber() / 10 ** 10).toString(),
       failed,
-      position: lockPrice.gt(closePrice) ? BetPosition.BEAR : BetPosition.BULL,
+      position:
+        // eslint-disable-next-line no-nested-ternary
+        closePrice.toString() === '0' ? undefined : lockPrice.gte(closePrice) ? BetPosition.BULL : BetPosition.BEAR,
     }
   } catch (e) {
-    console.log(e)
+    // console.log(e)
     return null
   }
 }

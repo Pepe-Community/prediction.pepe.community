@@ -7,15 +7,7 @@ import predictionsAbi from 'config/abi/predictions.json'
 import { getPredictionsAddress } from 'utils/addressHelpers'
 
 import { getPredictionsContract } from 'utils/contractHelpers'
-import {
-  BetResponse,
-  getRoundBaseFields,
-  getBetBaseFields,
-  getUserBaseFields,
-  RoundResponse,
-  TotalWonMarketResponse,
-  TotalWonRoundResponse,
-} from './queries'
+import { BetResponse, RoundResponse, TotalWonMarketResponse, TotalWonRoundResponse } from './queries'
 // eslint-disable-next-line import/no-cycle
 import { filterClaimed, getLastedRounds, getLedgerByRoundId, getRoundInfo, getUserInfo } from '.'
 
@@ -62,8 +54,9 @@ export const transformBetResponse = (betResponse: BetResponse): Bet => {
   const bet = {
     id: betResponse.id,
     hash: betResponse.hash,
+    // @ts-ignore
     amount: betResponse.amount ? parseFloat(betResponse.amount) : 0,
-    position: betResponse.position === 'Bull' ? BetPosition.BULL : BetPosition.BEAR,
+    position: betResponse.position,
     claimed: betResponse.claimed,
     claimedHash: betResponse.claimedHash,
     user: {
@@ -163,6 +156,7 @@ export const makeRoundData = (rounds: Round[]): RoundData => {
 
 export const getRoundResult = (bet: Bet, currentEpoch: number): Result => {
   const { round } = bet
+
   if (round.failed) {
     return Result.CANCELED
   }
@@ -170,7 +164,7 @@ export const getRoundResult = (bet: Bet, currentEpoch: number): Result => {
   if (round.epoch >= currentEpoch - 1) {
     return Result.LIVE
   }
-  const roundResultPosition = round.closePrice > round.lockPrice ? BetPosition.BULL : BetPosition.BEAR
+  const roundResultPosition = round.closePrice >= round.lockPrice ? BetPosition.BULL : BetPosition.BEAR
 
   return bet.position === roundResultPosition ? Result.WIN : Result.LOSE
 }
@@ -237,12 +231,11 @@ export const getMarketData = async (): Promise<{
       name,
     })),
   )) as [[boolean], [ethers.BigNumber]]
-
   const contract = getPredictionsContract()
   const rounds: any[] = await getLastedRounds(contract, getFiveNumbers(currentEpoch.toNumber()))
 
   return {
-    rounds: rounds.map(transformRoundResponse),
+    rounds: rounds.filter((round) => round !== null).map(transformRoundResponse),
     market: {
       epoch: currentEpoch.toNumber(),
       paused,
@@ -325,32 +318,11 @@ export const getUnClaimedBets = async (account: string, contract: any) => {
 
 export const getBetByContract = async (contract: any, id: string, account: string) => {
   const [position, amount, claimed] = await contract.ledger(id, account)
+  const _amount = amount.div(10 ** 9).toNumber() / 10 ** 9
   return {
-    position: position === 0 ? BetPosition.BULL : BetPosition.BEAR,
-    amount: amount.div(10 ** 9).toNumber() / 10 ** 9,
+    // eslint-disable-next-line no-nested-ternary
+    position: _amount === 0 ? undefined : position === 0 ? BetPosition.BULL : BetPosition.BEAR,
+    amount: _amount,
     claimed,
   }
-}
-
-export const getBet = async (betId: string): Promise<BetResponse> => {
-  const response = await request(
-    GRAPH_API_PREDICTION,
-    gql`
-      query getBet($id: ID!) {
-        bet(id: $id) {
-          ${getBetBaseFields()}
-          round {
-            ${getRoundBaseFields()}
-          }
-          user {
-            ${getUserBaseFields()}
-          }
-        }
-      }
-  `,
-    {
-      id: betId.toLowerCase(),
-    },
-  )
-  return response.bet
 }

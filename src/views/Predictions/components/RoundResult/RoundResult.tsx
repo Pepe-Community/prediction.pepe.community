@@ -12,7 +12,7 @@ interface RoundResultProps extends BoxProps {
 
 const RoundResult: React.FC<RoundResultProps> = ({ round, children, ...props }) => {
   const { lockPrice, closePrice, totalAmount } = round
-  const betPosition = closePrice > lockPrice ? BetPosition.BULL : BetPosition.BEAR
+  const betPosition = closePrice >= lockPrice ? BetPosition.BULL : BetPosition.BEAR
   const isPositionUp = betPosition === BetPosition.BULL
   const { t } = useTranslation()
   const priceDifference = closePrice - lockPrice
