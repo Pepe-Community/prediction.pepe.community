@@ -64,7 +64,7 @@ export default {
     // 56: '0x516ffd7D1e0Ca40b1879935B2De87cb20Fc1124b',
     // 97: '0x4f3140C74789F1D809420343ea83BcE52B7bbAA5',
     // Pepe
-    56: '0x8EFCd18aa5E235AE2A2C3a41225D95fFAFF5b6DC',
+    56: '0x80df8358c57f73f68e5ae845d44ea6a6894d8bf4',
     97: '0xC6576DBFCb9Ca8269caDD8052A8E986D6d2901A4',
   },
   chainlinkOracle: {
@@ -88,7 +88,7 @@ export default {
     97: '',
   },
   pepePrediction: {
-    56: '0x8EFCd18aa5E235AE2A2C3a41225D95fFAFF5b6DC',
+    56: '0x80df8358c57f73f68e5ae845d44ea6a6894d8bf4',
     97: '0xC6576DBFCb9Ca8269caDD8052A8E986D6d2901A4',
   },
 }

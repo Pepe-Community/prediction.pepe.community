@@ -534,7 +534,7 @@ export const useGetLastedBTCPrice = () => {
     const interval = setInterval(async () => {
       try {
         const _price: BigNumber = await pepePrediction._getPriceFromPancakeSwap()
-        setPrice(_price.toNumber() / 10 ** 10)
+        setPrice(_price.toNumber() / 10 ** 3)
       } catch (e) {
         // Ignore
       }
