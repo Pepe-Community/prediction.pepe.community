@@ -141,7 +141,7 @@ export const getRoundInfo = async (contract: any, roundId: string) => {
       failed,
       position:
         // eslint-disable-next-line no-nested-ternary
-        closePrice.toString() === '0' ? undefined : lockPrice.gte(closePrice) ? BetPosition.BULL : BetPosition.BEAR,
+        closePrice.toString() === '0' ? undefined : lockPrice.gte(closePrice) ? BetPosition.BEAR : BetPosition.BULL,
     }
   } catch (e) {
     // console.log(e)
