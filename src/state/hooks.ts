@@ -547,3 +547,26 @@ export const useGetLastedBTCPrice = () => {
 
   return price
 }
+export const useGetLastedBTCPriceBN = () => {
+  const [price, setPrice] = useState<BigNumber>(BIG_ZERO)
+
+  const pepePrediction = usePepePrediction()
+
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      try {
+        const _price: BigNumber = await pepePrediction._getPriceFromPancakeSwap()
+
+        setPrice(getBalanceAmount(new BigNumber(_price.toString()), 3))
+      } catch (e) {
+        // Ignore
+      }
+    }, 12000)
+
+    return () => {
+      clearInterval(interval)
+    }
+  }, [pepePrediction])
+
+  return price
+}

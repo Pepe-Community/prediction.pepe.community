@@ -57,7 +57,6 @@ export const getCakeVaultAddress = () => {
   return getAddress(addresses.cakeVault)
 }
 export const getPredictionsAddress = () => {
-  console.log(getAddress(addresses.predictions))
   return getAddress(addresses.predictions)
 }
 export const getChainlinkOracleAddress = () => {

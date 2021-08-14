@@ -65,8 +65,9 @@ const MobileMenu = () => {
         dispatch(setHistoryPaneState(true))
         break
       case 1:
-        dispatch(setChartPaneState(true))
-        dispatch(setHistoryPaneState(false))
+        window.open('https://dex.guru/token/0x7130d2a12b9bcbfae4f2634d864a1ee1ce3ead9c-bsc', '_blank')
+        // dispatch(setChartPaneState(true))
+        // dispatch(setHistoryPaneState(false))
         break
       case 0:
       default:
