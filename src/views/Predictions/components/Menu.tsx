@@ -54,13 +54,13 @@ const Menu = () => {
       <SetCol>
         <Flex alignItems="center" justifyContent="flex-end">
           <TimerLabelWrapper>
-            <TimerLabel interval="5" unit="m" />
+            <TimerLabel interval="15" unit="m" />
           </TimerLabelWrapper>
           <HelpButtonWrapper>
             <IconButton
               variant="subtle"
               as="a"
-              href="https://docs.pancakeswap.finance/products/prediction"
+              href="https://docs.pepe.community/price-prediction-game"
               target="_blank"
               rel="noreferrer noopener"
             >

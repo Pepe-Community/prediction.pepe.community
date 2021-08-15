@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { useWeb3React } from '@web3-react/core'
 import { useGetBetByRoundId, useGetCurrentEpoch } from 'state/hooks'
 import { BetPosition, Round } from 'state/types'
@@ -10,21 +10,52 @@ import SoonRoundCard from './SoonRoundCard'
 
 interface RoundCardProps {
   round: Round
+  previousRound?: Round
 }
 
-const RoundCard: React.FC<RoundCardProps> = ({ round }) => {
-  const { id, epoch, lockPrice, closePrice, totalAmount, bullAmount, bearAmount } = round
+const RoundCard: React.FC<RoundCardProps> = ({ round, previousRound }) => {
+  const { id, epoch, lockPrice, closePrice, totalAmount, bullAmount, bearAmount, failed } = round
   const currentEpoch = useGetCurrentEpoch()
   const { account } = useWeb3React()
+  const [isPreviousRoundFailed, setIsPreviousRoundFailed] = useState(false)
+  const [isCurrentRoundExpiredWithoutLock, setIsCurrentRoundExpiredWithoutLock] = useState(false)
   const bet = useGetBetByRoundId(account, id)
+
   const hasEntered = bet !== null
   const hasEnteredUp = hasEntered && bet.position === BetPosition.BULL
   const hasEnteredDown = hasEntered && bet.position === BetPosition.BEAR
   const bullMultiplier = getMultiplier(totalAmount, bullAmount)
   const bearMultiplier = getMultiplier(totalAmount, bearAmount)
 
+  const canBetWithoutStart = useMemo(() => {
+    if (epoch === currentEpoch && lockPrice === 0) {
+      return !failed
+    }
+    return isPreviousRoundFailed && epoch === currentEpoch + 1
+  }, [currentEpoch, epoch, failed, isPreviousRoundFailed, lockPrice])
+
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      if (previousRound?.epoch === currentEpoch) {
+        setIsPreviousRoundFailed(Boolean(previousRound?.failed))
+      }
+    }, 12000)
+    return () => {
+      clearInterval(interval)
+    }
+  }, [currentEpoch, previousRound?.epoch, previousRound?.failed])
+
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      setIsCurrentRoundExpiredWithoutLock(failed)
+    }, 12000)
+    return () => {
+      clearInterval(interval)
+    }
+  }, [failed])
+
   // Next (open) round
-  if (epoch === currentEpoch && lockPrice === null) {
+  if (canBetWithoutStart) {
     return (
       <OpenRoundCard
         round={round}
@@ -33,12 +64,13 @@ const RoundCard: React.FC<RoundCardProps> = ({ round }) => {
         betAmount={bet?.amount}
         bullMultiplier={bullMultiplier}
         bearMultiplier={bearMultiplier}
+        isAvailableToRestartManual={isPreviousRoundFailed}
       />
     )
   }
 
   // Live round
-  if (closePrice === null && epoch === currentEpoch - 1) {
+  if (closePrice === 0 && epoch === currentEpoch - 1) {
     return (
       <LiveRoundCard
         betAmount={bet?.amount}

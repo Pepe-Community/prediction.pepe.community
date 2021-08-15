@@ -60,8 +60,12 @@ export default {
     97: '',
   },
   predictions: {
-    56: '0x516ffd7D1e0Ca40b1879935B2De87cb20Fc1124b',
-    97: '0x4f3140C74789F1D809420343ea83BcE52B7bbAA5',
+    // Pancake
+    // 56: '0x516ffd7D1e0Ca40b1879935B2De87cb20Fc1124b',
+    // 97: '0x4f3140C74789F1D809420343ea83BcE52B7bbAA5',
+    // Pepe
+    56: '0x80df8358c57f73f68e5ae845d44ea6a6894d8bf4',
+    97: '0xC6576DBFCb9Ca8269caDD8052A8E986D6d2901A4',
   },
   chainlinkOracle: {
     56: '0x0567F2323251f0Aab15c8dFb1967E4e8A7D42aeE',
@@ -74,5 +78,17 @@ export default {
   bunnySpecialPrediction: {
     56: '0x342c99e9aC24157657095eC69CB04b73257e7A9C',
     97: '',
+  },
+  pepeProtocol: {
+    56: '0x0c1b3983d2a4aa002666820de5a0b43293291ea6',
+    97: '',
+  },
+  pancakeRouter: {
+    56: '0x10ed43c718714eb63d5aa57b78b54704e256024e',
+    97: '',
+  },
+  pepePrediction: {
+    56: '0x80df8358c57f73f68e5ae845d44ea6a6894d8bf4',
+    97: '0xC6576DBFCb9Ca8269caDD8052A8E986D6d2901A4',
   },
 }

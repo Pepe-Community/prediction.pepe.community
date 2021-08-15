@@ -6,15 +6,10 @@ import { multicallv2 } from 'utils/multicall'
 import predictionsAbi from 'config/abi/predictions.json'
 import { getPredictionsAddress } from 'utils/addressHelpers'
 
-import {
-  BetResponse,
-  getRoundBaseFields,
-  getBetBaseFields,
-  getUserBaseFields,
-  RoundResponse,
-  TotalWonMarketResponse,
-  TotalWonRoundResponse,
-} from './queries'
+import { getPredictionsContract } from 'utils/contractHelpers'
+import { BetResponse, RoundResponse, TotalWonMarketResponse, TotalWonRoundResponse } from './queries'
+// eslint-disable-next-line import/no-cycle
+import { filterClaimed, getLastedRounds, getLedgerByRoundId, getRoundInfo, getUserInfo } from '.'
 
 export enum Result {
   WIN = 'win',
@@ -59,8 +54,9 @@ export const transformBetResponse = (betResponse: BetResponse): Bet => {
   const bet = {
     id: betResponse.id,
     hash: betResponse.hash,
+    // @ts-ignore
     amount: betResponse.amount ? parseFloat(betResponse.amount) : 0,
-    position: betResponse.position === 'Bull' ? BetPosition.BULL : BetPosition.BEAR,
+    position: betResponse.position,
     claimed: betResponse.claimed,
     claimedHash: betResponse.claimedHash,
     user: {
@@ -160,6 +156,7 @@ export const makeRoundData = (rounds: Round[]): RoundData => {
 
 export const getRoundResult = (bet: Bet, currentEpoch: number): Result => {
   const { round } = bet
+
   if (round.failed) {
     return Result.CANCELED
   }
@@ -167,7 +164,7 @@ export const getRoundResult = (bet: Bet, currentEpoch: number): Result => {
   if (round.epoch >= currentEpoch - 1) {
     return Result.LIVE
   }
-  const roundResultPosition = round.closePrice > round.lockPrice ? BetPosition.BULL : BetPosition.BEAR
+  const roundResultPosition = round.closePrice >= round.lockPrice ? BetPosition.BULL : BetPosition.BEAR
 
   return bet.position === roundResultPosition ? Result.WIN : Result.LOSE
 }
@@ -214,7 +211,15 @@ export const getStaticPredictionsData = async (): Promise<StaticPredictionsData>
     rewardRate: rewardRate.toNumber(),
   }
 }
-
+function getFiveNumbers(input: number) {
+  if (!input) return []
+  const amountOfNumber = input < 5 ? input : 5
+  const result = []
+  for (let i = input; i > input - amountOfNumber; i--) {
+    result.push(i)
+  }
+  return result
+}
 export const getMarketData = async (): Promise<{
   rounds: Round[]
   market: Market
@@ -226,20 +231,11 @@ export const getMarketData = async (): Promise<{
       name,
     })),
   )) as [[boolean], [ethers.BigNumber]]
-
-  const response = (await request(
-    GRAPH_API_PREDICTION,
-    gql`
-      query getMarketData {
-        rounds(first: 5, orderBy: epoch, orderDirection: desc) {
-          ${getRoundBaseFields()}
-        }
-      }
-    `,
-  )) as { rounds: RoundResponse[] }
+  const contract = getPredictionsContract()
+  const rounds: any[] = await getLastedRounds(contract, getFiveNumbers(currentEpoch.toNumber()))
 
   return {
-    rounds: response.rounds.map(transformRoundResponse),
+    rounds: rounds.filter((round) => round !== null).map(transformRoundResponse),
     market: {
       epoch: currentEpoch.toNumber(),
       paused,
@@ -267,73 +263,66 @@ export const getTotalWon = async (): Promise<number> => {
   return transformTotalWonResponse(response.market, response.rounds)
 }
 
-export const getRound = async (id: string) => {
-  const response = await request(
-    GRAPH_API_PREDICTION,
-    gql`
-      query getRound($id: ID!) {
-        round(id: $id) {
-          ${getRoundBaseFields()}
-          bets {
-           ${getBetBaseFields()}
-            user {
-             ${getUserBaseFields()}
-            }
-          }
+export const getBetHistoryByRoundIds = async (account: string, roundIds: string[]): Promise<BetResponse[]> => {
+  const contract = getPredictionsContract()
+  const promises = []
+  for (let i = 0; i < roundIds.length; i++) {
+    promises.push(
+      new Promise((resolve) => {
+        getBetByContract(contract, roundIds[i], account).then((bet) => {
+          getUserInfo(account).then((user) => {
+            getRoundInfo(contract, roundIds[i]).then((round) => {
+              resolve({
+                ...bet,
+                user,
+                round,
+              })
+            })
+          })
+        })
+      }),
+    )
+  }
+  const result = await Promise.all(promises)
+  return result
+}
+export const getUnClaimedBets = async (account: string, contract: any) => {
+  const [roundsNum] = await contract.getUserRounds(account, 0, 100)
+  const roundDetailPromises = []
+  for (let i = 0; i < roundsNum.length; i++) {
+    roundDetailPromises.push(
+      new Promise((resolve, reject) => {
+        try {
+          getLedgerByRoundId(contract, account, roundsNum[i]).then((ledger) => {
+            getRoundInfo(contract, roundsNum[i].toNumber()).then((value) => {
+              getUserInfo(account).then((user) => {
+                resolve({
+                  ...ledger,
+                  round: value,
+                  user,
+                })
+              })
+            })
+          })
+        } catch (e) {
+          reject(e)
         }
-      }
-  `,
-    { id },
-  )
-  return response.round
+      }),
+    )
+  }
+  const roundDetailList = await Promise.all(roundDetailPromises)
+  const bets = filterClaimed(roundDetailList, false).map(transformBetResponse)
+
+  return bets
 }
 
-type BetHistoryWhereClause = Record<string, string | number | boolean | string[]>
-
-export const getBetHistory = async (
-  where: BetHistoryWhereClause = {},
-  first = 1000,
-  skip = 0,
-): Promise<BetResponse[]> => {
-  const response = await request(
-    GRAPH_API_PREDICTION,
-    gql`
-      query getBetHistory($first: Int!, $skip: Int!, $where: Bet_filter) {
-        bets(first: $first, skip: $skip, where: $where) {
-          ${getBetBaseFields()}
-          round {
-            ${getRoundBaseFields()}
-          }
-          user {
-            ${getUserBaseFields()}
-          } 
-        }
-      }
-    `,
-    { first, skip, where },
-  )
-  return response.bets
-}
-
-export const getBet = async (betId: string): Promise<BetResponse> => {
-  const response = await request(
-    GRAPH_API_PREDICTION,
-    gql`
-      query getBet($id: ID!) {
-        bet(id: $id) {
-          ${getBetBaseFields()}
-          round {
-            ${getRoundBaseFields()}
-          }
-          user {
-            ${getUserBaseFields()}
-          } 
-        }
-      }
-  `,
-    {
-      id: betId.toLowerCase(),
-    },
-  )
-  return response.bet
+export const getBetByContract = async (contract: any, id: string, account: string) => {
+  const [position, amount, claimed] = await contract.ledger(id, account)
+  const _amount = amount.div(10 ** 9).toNumber() / 10 ** 9
+  return {
+    // eslint-disable-next-line no-nested-ternary
+    position: _amount === 0 ? undefined : position === 0 ? BetPosition.BULL : BetPosition.BEAR,
+    amount: _amount,
+    claimed,
+  }
 }

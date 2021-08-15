@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import BigNumber from 'bignumber.js'
 import { useWeb3React } from '@web3-react/core'
 import { CardBody, PlayCircleOutlineIcon, Button, useTooltip, ArrowUpIcon, ArrowDownIcon } from '@pancakeswap/uikit'
@@ -23,6 +23,7 @@ interface OpenRoundCardProps {
   hasEnteredDown: boolean
   bullMultiplier: number
   bearMultiplier: number
+  isAvailableToRestartManual?: boolean
 }
 
 interface State {
@@ -37,6 +38,7 @@ const OpenRoundCard: React.FC<OpenRoundCardProps> = ({
   hasEnteredDown,
   bullMultiplier,
   bearMultiplier,
+  isAvailableToRestartManual = false,
 }) => {
   const [state, setState] = useState<State>({
     isSettingPosition: false,
@@ -64,8 +66,11 @@ const OpenRoundCard: React.FC<OpenRoundCardProps> = ({
     if (hasEnteredUp || hasEnteredDown) {
       return false
     }
+    if (isAvailableToRestartManual) {
+      return true
+    }
 
-    if (round.lockPrice !== null) {
+    if (round.lockPrice !== 0 && round.lockPrice !== null) {
       return false
     }
 
@@ -73,6 +78,12 @@ const OpenRoundCard: React.FC<OpenRoundCardProps> = ({
   }
 
   const canEnterPosition = getCanEnterPosition()
+  const disabledBetButton = useMemo(() => {
+    if (isAvailableToRestartManual) {
+      return false
+    }
+    return !canEnterPosition || isBufferPhase
+  }, [canEnterPosition, isAvailableToRestartManual, isBufferPhase])
 
   const handleBack = () =>
     setState((prevState) => ({
@@ -147,7 +158,7 @@ const OpenRoundCard: React.FC<OpenRoundCardProps> = ({
                   width="100%"
                   onClick={() => handleSetPosition(BetPosition.BULL)}
                   mb="4px"
-                  disabled={!canEnterPosition || isBufferPhase}
+                  disabled={disabledBetButton}
                 >
                   {t('Enter UP')}
                 </Button>
@@ -155,7 +166,7 @@ const OpenRoundCard: React.FC<OpenRoundCardProps> = ({
                   variant="danger"
                   width="100%"
                   onClick={() => handleSetPosition(BetPosition.BEAR)}
-                  disabled={!canEnterPosition || isBufferPhase}
+                  disabled={disabledBetButton}
                 >
                   {t('Enter DOWN')}
                 </Button>

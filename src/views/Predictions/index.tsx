@@ -1,6 +1,5 @@
 import React, { useEffect, useRef } from 'react'
 import { useWeb3React } from '@web3-react/core'
-import { Helmet } from 'react-helmet-async'
 import { useMatchBreakpoints, useModal } from '@pancakeswap/uikit'
 import { useAppDispatch } from 'state'
 import { useGetPredictionsStatus, useInitialBlock, useIsChartPaneOpen } from 'state/hooks'
@@ -15,7 +14,6 @@ import { fetchCurrentBets, initialize, setPredictionStatus } from 'state/predict
 import { HistoryFilter, PredictionStatus } from 'state/types'
 import usePersistState from 'hooks/usePersistState'
 import PageLoader from 'components/PageLoader'
-import usePollOraclePrice from './hooks/usePollOraclePrice'
 import usePollRoundData from './hooks/usePollRoundData'
 import Container from './components/Container'
 import CollectWinningsPopup from './components/CollectWinningsPopup'
@@ -109,24 +107,19 @@ const Predictions = () => {
   }, [initialBlock, dispatch, account])
 
   usePollRoundData()
-  usePollOraclePrice()
+  // usePollOraclePrice()
 
   if (status === PredictionStatus.INITIAL) {
     return <PageLoader />
   }
 
   return (
-    <>
-      <Helmet>
-        <script src="https://s3.tradingview.com/tv.js" type="text/javascript" id="tradingViewWidget" />
-      </Helmet>
-      <SwiperProvider>
-        <Container>
-          {isDesktop ? <Desktop /> : <Mobile />}
-          <CollectWinningsPopup />
-        </Container>
-      </SwiperProvider>
-    </>
+    <SwiperProvider>
+      <Container>
+        {isDesktop ? <Desktop /> : <Mobile />}
+        <CollectWinningsPopup />
+      </Container>
+    </SwiperProvider>
   )
 }
 

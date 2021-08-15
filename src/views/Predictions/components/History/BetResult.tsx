@@ -8,7 +8,8 @@ import styled from 'styled-components'
 import { Bet, BetPosition } from 'state/types'
 import { fetchBet } from 'state/predictions'
 import { Result } from 'state/predictions/helpers'
-import { getBscScanTransactionUrl } from 'utils/bscscan'
+import { getBscScanAddressUrl } from 'utils/bscscan'
+import { usePepePrediction } from 'hooks/useContract'
 import useIsRefundable from '../../hooks/useIsRefundable'
 import { formatBnb, getNetPayout } from '../../helpers'
 import CollectWinningsButton from '../CollectWinningsButton'
@@ -43,6 +44,7 @@ const BetResult: React.FC<BetResultProps> = ({ bet, result }) => {
     <Text as="p">{t('Includes your original position and your winnings, minus the %fee% fee.', { fee: '3%' })}</Text>,
     { placement: 'auto' },
   )
+  const pepePrediction = usePepePrediction()
 
   const isWinner = result === Result.WIN
 
@@ -101,7 +103,7 @@ const BetResult: React.FC<BetResultProps> = ({ bet, result }) => {
   }
 
   const handleSuccess = async () => {
-    await dispatch(fetchBet({ account, id: bet.id }))
+    await dispatch(fetchBet({ account, id: bet.id, contract: pepePrediction }))
   }
 
   return (
@@ -131,7 +133,7 @@ const BetResult: React.FC<BetResultProps> = ({ bet, result }) => {
         )}
         {bet.claimed && (
           <Flex justifyContent="center">
-            <LinkExternal href={getBscScanTransactionUrl(bet.claimedHash)} mb="16px">
+            <LinkExternal href={getBscScanAddressUrl(bet.user.address)} mb="16px">
               {t('View on BscScan')}
             </LinkExternal>
           </Flex>

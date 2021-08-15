@@ -25,6 +25,9 @@ import {
   getMulticallAddress,
   getBunnySpecialCakeVaultAddress,
   getBunnySpecialPredictionAddress,
+  getPepeAddress,
+  getPancakeRouterAddress,
+  getPepePredictionAddress,
 } from 'utils/addressHelpers'
 
 // ABI
@@ -55,6 +58,9 @@ import chainlinkOracleAbi from 'config/abi/chainlinkOracle.json'
 import MultiCallAbi from 'config/abi/Multicall.json'
 import bunnySpecialCakeVaultAbi from 'config/abi/bunnySpecialCakeVault.json'
 import bunnySpecialPredictionAbi from 'config/abi/bunnySpecialPrediction.json'
+import pepeAbi from 'config/abi/pepeProtocol.json'
+import pancakeRouterAbi from 'config/abi/pancakeRouter.json'
+import pepePredictionAbi from 'config/abi/pepePrediction.json'
 
 const getContract = (abi: any, address: string, signer?: ethers.Signer | ethers.providers.Provider) => {
   const signerOrProvider = signer ?? simpleRpcProvider
@@ -141,4 +147,16 @@ export const getBunnySpecialCakeVaultContract = (signer?: ethers.Signer | ethers
 }
 export const getBunnySpecialPredictionContract = (signer?: ethers.Signer | ethers.providers.Provider) => {
   return getContract(bunnySpecialPredictionAbi, getBunnySpecialPredictionAddress(), signer)
+}
+
+export const getPepeContract = (signer?: ethers.Signer | ethers.providers.Provider) => {
+  return getContract(pepeAbi, getPepeAddress(), signer)
+}
+
+export const getPancakeRouterContract = (signer?: ethers.Signer | ethers.providers.Provider) => {
+  return getContract(pancakeRouterAbi, getPancakeRouterAddress(), signer)
+}
+
+export const getPepePredictionContract = (signer?: ethers.Signer | ethers.providers.Provider) => {
+  return getContract(pepePredictionAbi, getPepePredictionAddress(), signer)
 }

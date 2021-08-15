@@ -47,9 +47,9 @@ const Positions: React.FC = () => {
           keyboard
           resizeObserver
         >
-          {rounds.map((round) => (
+          {rounds.map((round, idx) => (
             <SwiperSlide key={round.id}>
-              <RoundCard round={round} />
+              <RoundCard round={round} previousRound={idx > 0 ? rounds[idx - 1] : null} />
             </SwiperSlide>
           ))}
         </Swiper>

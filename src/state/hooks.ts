@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import BigNumber from 'bignumber.js'
 import { useWeb3React } from '@web3-react/core'
 import { useSelector } from 'react-redux'
@@ -12,6 +12,7 @@ import { getBalanceAmount } from 'utils/formatBalance'
 import { BIG_ZERO } from 'utils/bigNumber'
 import useRefresh from 'hooks/useRefresh'
 import { filterFarmsByQuoteToken } from 'utils/farmsPriceHelpers'
+import { usePancakeRouter, usePepe, usePepePrediction } from 'hooks/useContract'
 import {
   fetchFarmsPublicDataAsync,
   fetchPoolsPublicDataAsync,
@@ -331,6 +332,32 @@ export const usePriceCakeBusd = (): BigNumber => {
   return new BigNumber(cakeBnbFarm.token.busdPrice)
 }
 
+export const usePepePriceBusd = (): number => {
+  const [price, setPrice] = useState(0)
+  const pepeContract = usePepe()
+  const pancakeRouter = usePancakeRouter()
+
+  useEffect(() => {
+    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/no-extra-semi
+    ;(async () => {
+      try {
+        if (!pepeContract || !pancakeRouter) return
+        const PepeAddress = await pepeContract.address
+        const [, pepePricePerBillion] = await pancakeRouter.getAmountsOut('1000000000000000000', [
+          PepeAddress,
+          '0xe9e7cea3dedca5984780bafc599bd69add087d56',
+        ])
+        setPrice(new BigNumber(pepePricePerBillion.toString()).div(10 ** 9).toNumber() / 10 ** 9)
+      } catch (e) {
+        // Ignore
+      }
+    })()
+  }, [pancakeRouter, pepeContract])
+
+  return price
+}
+
 // Block
 export const useBlock = () => {
   return useSelector((state: State) => state.block)
@@ -497,4 +524,49 @@ export const useGetVotingStateLoadingStatus = () => {
 export const useGetProposalLoadingStatus = () => {
   const votingStatus = useSelector((state: State) => state.voting.proposalLoadingStatus)
   return votingStatus
+}
+
+export const useGetLastedBTCPrice = () => {
+  const [price, setPrice] = useState(0)
+  const pepePrediction = usePepePrediction()
+
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      try {
+        const _price: BigNumber = await pepePrediction._getPriceFromPancakeSwap()
+        setPrice(_price.toNumber() / 10 ** 3)
+      } catch (e) {
+        // Ignore
+      }
+    }, 12000)
+
+    return () => {
+      clearInterval(interval)
+    }
+  }, [pepePrediction])
+
+  return price
+}
+export const useGetLastedBTCPriceBN = () => {
+  const [price, setPrice] = useState<BigNumber>(BIG_ZERO)
+
+  const pepePrediction = usePepePrediction()
+
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      try {
+        const _price: BigNumber = await pepePrediction._getPriceFromPancakeSwap()
+
+        setPrice(getBalanceAmount(new BigNumber(_price.toString()), 3))
+      } catch (e) {
+        // Ignore
+      }
+    }, 12000)
+
+    return () => {
+      clearInterval(interval)
+    }
+  }, [pepePrediction])
+
+  return price
 }

@@ -12,11 +12,10 @@ interface RoundsTabProps {
 
 const RoundsTab: React.FC<RoundsTabProps> = ({ hasBetHistory, bets }) => {
   const { t } = useTranslation()
-
   return hasBetHistory ? (
     <>
       {orderBy(bets, ['round.epoch'], ['desc']).map((bet) => (
-        <HistoricalBet key={bet.id} bet={bet} />
+        <HistoricalBet key={bet.round.id} bet={bet} />
       ))}
     </>
   ) : (

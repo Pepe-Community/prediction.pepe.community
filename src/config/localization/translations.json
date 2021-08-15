@@ -125,7 +125,7 @@
   "Round #%num%": "Round #%num%",
   "Total Pot:": "Total Pot:",
   "Staking Pool": "Staking Pool",
-  "PancakeSwap": "PancakeSwap",
+  "PancakeSwap": "PEPE Community Coin",
   "The #1 AMM and yield farm on Binance Smart Chain.": "The #1 AMM and yield farm on Binance Smart Chain.",
   "Stake CAKE to earn new tokens.": "Stake CAKE to earn new tokens.",
   "Launch Time": "Launch Time",
@@ -903,5 +903,7 @@
   "Amount to collect": "Amount to collect",
   "Your winnings": "Your winnings",
   "Includes your original position and your winnings, minus the %fee% fee.": "Includes your original position and your winnings, minus the %fee% fee.",
-  "Your funds have been staked in the farm": "Your funds have been staked in the farm"
+  "Your funds have been staked in the farm": "Your funds have been staked in the farm",
+  "Game is pause": "Game is pause",
+  "Restart now": "Restart now"
 }

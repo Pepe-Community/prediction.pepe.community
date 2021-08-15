@@ -25,6 +25,9 @@ import {
   getLotteryV2Contract,
   getBunnySpecialCakeVaultContract,
   getBunnySpecialPredictionContract,
+  getPepeContract,
+  getPancakeRouterContract,
+  getPepePredictionContract,
 } from 'utils/contractHelpers'
 
 /**
@@ -152,4 +155,19 @@ export const useSpecialBunnyCakeVaultContract = () => {
 export const useSpecialBunnyPredictionContract = () => {
   const provider = useWeb3Provider()
   return useMemo(() => getBunnySpecialPredictionContract(provider.getSigner()), [provider])
+}
+
+export const usePepe = () => {
+  const provider = useWeb3Provider()
+  return useMemo(() => getPepeContract(provider.getSigner()), [provider])
+}
+
+export const usePancakeRouter = () => {
+  const provider = useWeb3Provider()
+  return useMemo(() => getPancakeRouterContract(provider.getSigner()), [provider])
+}
+
+export const usePepePrediction = () => {
+  const provider = useWeb3Provider()
+  return useMemo(() => getPepePredictionContract(provider.getSigner()), [provider])
 }

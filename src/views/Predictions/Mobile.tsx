@@ -63,9 +63,6 @@ const Mobile: React.FC = () => {
             {status === PredictionStatus.LIVE && <Positions />}
           </Flex>
         </View>
-        <View isVisible={view === PageView.CHART}>
-          <Chart />
-        </View>
         <View isVisible={view === PageView.HISTORY}>
           <History />
         </View>

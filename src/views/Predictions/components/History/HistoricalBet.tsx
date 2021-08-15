@@ -75,7 +75,7 @@ const HistoricalBet: React.FC<BetProps> = ({ bet }) => {
   const resultTextColor = getRoundColor(roundResult)
   const resultTextPrefix = getRoundPrefix(roundResult)
   const isOpenRound = round.epoch === currentEpoch
-  const isLiveRound = status === PredictionStatus.LIVE && round.epoch === currentEpoch - 1
+  const isLiveRound = status === PredictionStatus.LIVE && round.epoch === currentEpoch - 1 && !bet.round.failed
   const canClaim = useBetCanClaim(account, bet.round.id)
 
   // Winners get the payout, otherwise the claim what they put it if it was canceled

@@ -4,7 +4,7 @@ import { useCountUp } from 'react-countup'
 import { CardBody, Flex, PlayCircleOutlineIcon, Skeleton, Text, TooltipText, useTooltip } from '@pancakeswap/uikit'
 import { useTranslation } from 'contexts/Localization'
 import { Round, BetPosition } from 'state/types'
-import { useBlock, useGetIntervalBlocks, useGetLastOraclePrice } from 'state/hooks'
+import { useBlock, useGetIntervalBlocks, useGetLastedBTCPriceBN } from 'state/hooks'
 import BlockProgress from 'components/BlockProgress'
 import { formatUsd, getBubbleGumBackground } from '../../helpers'
 import PositionTag from '../PositionTag'
@@ -46,7 +46,7 @@ const LiveRoundCard: React.FC<LiveRoundCardProps> = ({
   const { lockPrice, lockBlock, totalAmount } = round
   const { currentBlock } = useBlock()
   const totalInterval = useGetIntervalBlocks()
-  const price = useGetLastOraclePrice()
+  const price = useGetLastedBTCPriceBN()
   const isBull = price.gt(lockPrice)
   const priceColor = isBull ? 'success' : 'failure'
   const estimatedEndBlock = lockBlock + totalInterval
