@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { useWeb3React } from '@web3-react/core'
-import { useGetBetByRoundId, useGetCurrentEpoch } from 'state/hooks'
+import { useBlock, useGetBetByRoundId, useGetCurrentEpoch, useGetIntervalBlocks } from 'state/hooks'
 import { BetPosition, Round } from 'state/types'
 import { getMultiplier } from '../../helpers'
 import ExpiredRoundCard from './ExpiredRoundCard'
@@ -17,8 +17,9 @@ const RoundCard: React.FC<RoundCardProps> = ({ round, previousRound }) => {
   const { id, epoch, lockPrice, closePrice, totalAmount, bullAmount, bearAmount, failed } = round
   const currentEpoch = useGetCurrentEpoch()
   const { account } = useWeb3React()
+  const { currentBlock } = useBlock()
+  const totalInterval = useGetIntervalBlocks()
   const [isPreviousRoundFailed, setIsPreviousRoundFailed] = useState(false)
-  const [isCurrentRoundExpiredWithoutLock, setIsCurrentRoundExpiredWithoutLock] = useState(false)
   const bet = useGetBetByRoundId(account, id)
 
   const hasEntered = bet !== null
@@ -26,13 +27,17 @@ const RoundCard: React.FC<RoundCardProps> = ({ round, previousRound }) => {
   const hasEnteredDown = hasEntered && bet.position === BetPosition.BEAR
   const bullMultiplier = getMultiplier(totalAmount, bullAmount)
   const bearMultiplier = getMultiplier(totalAmount, bearAmount)
+  const isCalculatingPreviousRound = currentBlock > previousRound?.lockBlock
 
   const canBetWithoutStart = useMemo(() => {
     if (epoch === currentEpoch && lockPrice === 0) {
       return !failed
     }
-    return isPreviousRoundFailed && epoch === currentEpoch + 1
-  }, [currentEpoch, epoch, failed, isPreviousRoundFailed, lockPrice])
+    if (epoch === currentEpoch + 1) {
+      return isPreviousRoundFailed || isCalculatingPreviousRound
+    }
+    return false
+  }, [currentEpoch, epoch, failed, isCalculatingPreviousRound, isPreviousRoundFailed, lockPrice])
 
   useEffect(() => {
     const interval = setInterval(async () => {
@@ -44,15 +49,6 @@ const RoundCard: React.FC<RoundCardProps> = ({ round, previousRound }) => {
       clearInterval(interval)
     }
   }, [currentEpoch, previousRound?.epoch, previousRound?.failed])
-
-  useEffect(() => {
-    const interval = setInterval(async () => {
-      setIsCurrentRoundExpiredWithoutLock(failed)
-    }, 12000)
-    return () => {
-      clearInterval(interval)
-    }
-  }, [failed])
 
   // Next (open) round
   if (canBetWithoutStart) {
