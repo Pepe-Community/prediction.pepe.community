@@ -42,7 +42,7 @@ const CanceledRoundCard: React.FC<CanceledRoundCardProps> = ({ round }) => {
               {t('Round Canceled')}
             </Text>
             {isRefundable && <ReclaimPositionButton epoch={epoch} onSuccess={handleSuccess} width="100%" my="8px" />}
-            <LinkExternal href="https://docs.pancakeswap.finance/products/prediction" external>
+            <LinkExternal href="https://docs.pepe.community/price-prediction-game/" external>
               {t('Learn More')}
             </LinkExternal>
           </Flex>
