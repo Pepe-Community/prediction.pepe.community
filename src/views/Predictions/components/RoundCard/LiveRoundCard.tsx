@@ -57,7 +57,7 @@ const LiveRoundCard: React.FC<LiveRoundCardProps> = ({
     duration: 1,
     decimals: 3,
   })
-  const { targetRef, tooltip, tooltipVisible } = useTooltip(t('Last price from Chainlink Oracle'), {
+  const { targetRef, tooltip, tooltipVisible } = useTooltip(t('Last price from PancakeSwap contract'), {
     placement: 'bottom',
   })
 
